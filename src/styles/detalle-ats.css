@@ -1,0 +1,36 @@
+.ats-detail-wrap {
+  border: 1px solid #e4e9ec;
+  border-radius: 5px;
+  margin-top: 10px;
+  overflow-x: auto;
+}
+
+.ats-detail-table {
+  min-width: 760px;
+  width: 100%;
+  table-layout: auto;
+}
+
+.ats-detail-table th,
+.ats-detail-table td {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  vertical-align: top;
+  text-align: left;
+}
+
+.ats-detail-table th:first-child,
+.ats-detail-table td:first-child {
+  width: 48px;
+}
+
+.ats-detail-table th:nth-child(5),
+.ats-detail-table td:nth-child(5) {
+  width: 95px;
+}
+
+.ats-empty {
+  color: #667982;
+  font-size: 13px;
+  margin: 12px 0 0;
+}

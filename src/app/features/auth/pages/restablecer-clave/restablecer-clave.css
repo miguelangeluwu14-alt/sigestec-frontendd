@@ -1,0 +1,21 @@
+
+.recovery-card { width: min(460px, 100%); padding: 30px 34px; border: 1px solid #cdd9dc;
+  border-radius: 8px; background: #fff; box-shadow: 0 2px 14px #0c31320a; }
+.recovery-card h1 { margin-bottom: 15px; font-size: 24px; }
+.recovery-card form { display: flex; flex-direction: column; gap: 12px; }
+.recovery-card label { font-size: 13px; color: #34454a; font-weight: 600; }
+.recovery-card input:not([type='checkbox']) { width: 100%; padding: 13px 12px;
+  border: 1px solid #b8c9ce; border-radius: 6px; background: #f2f8fb; }
+.recovery-card input:focus { outline: 2px solid #006773; outline-offset: 1px; }
+.recovery-muted { color: #59646b; font-size: 14px; line-height: 1.55; margin-bottom: 23px; }
+.recovery-submit { background: #006773; color: white; border: 0; border-radius: 6px;
+  font-weight: 600; min-height: 49px; width: 100%; margin-top: 8px; }
+.recovery-submit:hover { background: #00535d; }
+.recovery-error { background: #fff0f0; color: #972b2b; padding: 12px; border-radius: 6px;
+  margin: 10px 0; font-size: 13px; line-height: 1.5; }
+.recovery-success { background: #e8f7ee; color: #20613c; padding: 14px; border-radius: 6px;
+  margin-bottom: 18px; font-size: 14px; line-height: 1.6; }
+.recovery-back { display: block; margin-top: 22px; text-align: center; font-size: 13px;
+  text-decoration: underline; }
+.recovery-check { display: flex; align-items: center; gap: 9px; font-weight: 400 !important; }
+.recovery-check input { width: 16px; height: 16px; }

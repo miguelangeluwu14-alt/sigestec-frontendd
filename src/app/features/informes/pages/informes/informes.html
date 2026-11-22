@@ -1,0 +1,208 @@
+@if (enListado) {
+  <div class="page-title-row">
+    <h1>Registrar informe técnico</h1>
+    <a class="action-primary" routerLink="/informes/nuevo">＋ Nuevo informe</a>
+  </div>
+  <section class="filters-card">
+    <div class="filter-large">
+      <label>Búsqueda rápida</label>
+      <div class="search-input">
+        <span>⌕</span>
+        <input [(ngModel)]="buscar" (input)="buscarAhora()" placeholder="Informe, OT o cliente" />
+      </div>
+    </div>
+  </section>
+  <section class="list-card">
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>INFORME</th>
+            <th>OT</th>
+            <th>CLIENTE</th>
+            <th>ENVÍO</th>
+            <th>ESTADO</th>
+            <th>ACCIÓN</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (i of paginados; track i.id) {
+            <tr>
+              <td class="table-code">{{ i.numeroInforme }}</td>
+              <td>OT-{{ i.ordenTrabajo?.id }}</td>
+              <td>{{ i.ordenTrabajo?.solicitud?.cliente?.razonSocial }}</td>
+              <td>{{ i.fechaEnvio }}</td>
+              <td>
+                <span [class]="'status-chip ' + claseEstado(i.estado)">{{ i.estado }}</span>
+              </td>
+              <td>
+                <div class="row-actions">
+                  <a [routerLink]="['/informes/ver', i.id]" class="accion-ver-detalle" title="Ver detalles" aria-label="Ver detalles"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></a>
+                <app-acciones-seguras [mostrarVer]="false" recurso="informes" [registro]="i" (actualizado)="actualizarListado('/informes')" />
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="empty-row">No hay informes técnicos.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <div class="table-footer">
+      <span>{{ filtrados.length }} informes</span>
+      <div class="pagination">
+        <button [disabled]="pagina === 1" (click)="irPagina(pagina - 1)">‹</button>
+        @for (n of paginas; track n) {
+          <button [class.current]="n === pagina" (click)="irPagina(n)">{{ n }}</button>
+        }
+      </div>
+    </div>
+  </section>
+  @if (error()) {
+    <p class="alert error">{{ error() }}</p>
+  }
+} @else if (esDetalle) {
+  <div class="form-page">
+    <div class="detail-head">
+      <h1>Informe {{ registro?.numeroInforme }}</h1>
+      <a class="action-secondary" routerLink="/informes">Volver</a>
+    </div>
+    @if (registro) {
+      @for (ev of registro.evidencias || []; track ev.id) { <app-documento-adjunto [url]="ev.urlArchivo" [nombre]="ev.nombreArchivo" /> }
+      @if (registro.urlArchivo) { <app-documento-adjunto [url]="registro.urlArchivo" /> }
+      <div class="detail-grid">
+        <div>
+          <label>Orden de trabajo</label>
+          <strong>OT-{{ registro.ordenTrabajo?.id }}</strong>
+        </div>
+        <div>
+          <label>Fecha de envío</label>
+          <strong>{{ registro.fechaEnvio }}</strong>
+        </div>
+        <div class="full">
+          <label>Diagnóstico</label>
+          <p>{{ registro.diagnostico }}</p>
+        </div>
+        <div class="full">
+          <label>Trabajos realizados</label>
+          <p>{{ registro.trabajosRealizados }}</p>
+        </div>
+        <div class="full">
+          <label>Conclusiones</label>
+          <p>{{ registro.conclusiones }}</p>
+        </div>
+        <div class="full">
+          <label>Recomendaciones</label>
+          <p>{{ registro.recomendaciones }}</p>
+        </div>
+        <div class="full">
+          <label>Documento y evidencias</label>
+          @if (registro.urlArchivo) {
+            <button
+              class="outlined-link"
+              (click)="descargar(registro.urlArchivo, 'informe-' + registro.id + '.pdf')"
+            >
+              Descargar informe PDF
+            </button>
+          }
+          @for (f of registro.evidencias; track f.id) {
+            <button class="outlined-link" (click)="descargar(f.urlArchivo, f.nombreArchivo)">
+              {{ f.nombreArchivo }}
+            </button>
+          }
+        </div>
+      </div>
+    }
+  </div>
+} @else {
+  <div class="form-page">
+    <div class="detail-head">
+      <h1>{{ esEdicion ? 'Editar informe técnico' : 'Registrar informe técnico' }}</h1>
+      @if (esEdicion) { <p class="detail-note">La OT, el número y la fecha de envío permanecen bloqueados. Se permiten correcciones técnicas antes de la conformidad.</p> }
+      <a class="action-secondary" routerLink="/informes">Volver</a>
+    </div>
+    <section class="form-section">
+      <h2>Orden de trabajo ejecutada</h2>
+      <div class="form-grid">
+        <div class="full">
+          <label>OT CON EJECUCIÓN REGISTRADA *</label>
+          <select [(ngModel)]="form.ordenTrabajoId" [disabled]="esEdicion">
+            @if (esEdicion) { <option [ngValue]="form.ordenTrabajoId">OT-{{ form.ordenTrabajoId }}</option> }
+            <option [ngValue]="null">Seleccione la OT</option>
+            @for (e of elegibles; track e.id) {
+              <option [ngValue]="e.ordenTrabajo?.id">
+                OT-{{ e.ordenTrabajo?.id }} · {{ e.ordenTrabajo?.solicitud?.cliente?.razonSocial }}
+              </option>
+            }
+          </select>
+        </div>
+        <div>
+          <label>NÚMERO DE INFORME (opcional)</label>
+          <input [(ngModel)]="form.numeroInforme" placeholder="Automático si se deja vacío" [disabled]="esEdicion" />
+        </div>
+        <div>
+          <label>FECHA DE ENVÍO AL CLIENTE *</label>
+          <input type="date" [(ngModel)]="form.fechaEnvio" [disabled]="esEdicion" />
+        </div>
+      </div>
+      @if (actual) {
+        <p class="detail-note">
+          Ejecución {{ actual.id }} · Fecha: {{ actual.fechaEjecucion?.slice(0, 10) }} · Cliente:
+          {{ actual.ordenTrabajo?.solicitud?.cliente?.razonSocial }}
+        </p>
+      }
+    </section>
+    <section class="form-section">
+      <h2>Contenido técnico</h2>
+      <div class="field-block">
+        <label>DIAGNÓSTICO *</label>
+        <textarea rows="4" [(ngModel)]="form.diagnostico"></textarea>
+      </div>
+      <div class="field-block">
+        <label>TRABAJOS REALIZADOS *</label>
+        <textarea rows="4" [(ngModel)]="form.trabajosRealizados"></textarea>
+      </div>
+      <div class="field-block">
+        <label>CONCLUSIONES *</label>
+        <textarea rows="4" [(ngModel)]="form.conclusiones"></textarea>
+      </div>
+      <div class="field-block">
+        <label>RECOMENDACIONES</label>
+        <textarea rows="3" [(ngModel)]="form.recomendaciones"></textarea>
+      </div>
+    </section>
+    <section class="form-section">
+      <h2>Adjuntos opcionales</h2>
+      @for (foto of fotos; track $index) { <app-documento-adjunto [archivo]="foto" [permitirQuitar]="true" (quitar)="quitarFoto($index)" /> }
+      <div class="form-grid">
+        <div>
+          <label>INFORME EN PDF</label>
+          <input type="file" accept=".pdf,application/pdf" (change)="archivo($event)" />
+        @if (esEdicion && registro?.urlArchivo && !quitarPdf) { <app-documento-adjunto [url]="registro.urlArchivo" [permitirQuitar]="true" (quitar)="quitarPdf = true" /> }
+        @if (quitarPdf) { <button type="button" class="action-secondary" (click)="quitarPdf=false">Conservar documento anterior</button> }
+        <app-documento-adjunto [archivo]="pdf" [permitirQuitar]="true" (quitar)="pdf = null" />
+        </div>
+        @if (!esEdicion) { <div>
+          <label>FOTOGRAFÍAS ADICIONALES</label>
+          <input
+            type="file"
+            multiple
+            accept=".png,.jpg,.jpeg,image/png,image/jpeg"
+            (change)="fotosSeleccionadas($event)"
+          />
+        </div> }
+      </div>
+    </section>
+    @if (error()) {
+      <p class="alert error">{{ error() }}</p>
+    }
+    <div class="form-actions">
+      <a class="action-secondary" routerLink="/informes">Cancelar</a>
+      <button [disabled]="guardando()" class="action-primary" (click)="guardar()">
+        {{ esEdicion ? 'Guardar cambios' : 'Registrar informe' }}
+      </button>
+    </div>
+  </div>
+}

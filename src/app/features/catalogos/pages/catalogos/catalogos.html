@@ -1,0 +1,84 @@
+<div class="page-heading">
+  <h1>{{ esClientes ? 'Clientes' : 'Tipos de servicio' }}</h1>
+</div>
+<div class="two-cols">
+  <section class="panel">
+    <div class="panel-heading">
+      <h2>Nuevo registro</h2>
+    </div>
+    @if (esClientes) {
+      <div class="consulta-empresa mb-3">
+        <label for="buscar-empresa">Buscar empresa en el padrón SUNAT</label>
+        <div class="input-group">
+          <input id="buscar-empresa" class="form-control" [(ngModel)]="buscarEmpresa" (keyup.enter)="consultarEmpresa()"
+                 placeholder="RUC o razón social" maxlength="80" />
+          <button type="button" class="btn btn-outline-primary" [disabled]="consultando" (click)="consultarEmpresa()">
+            {{ consultando ? 'Consultando...' : 'Consultar' }}
+          </button>
+        </div>
+        @if (errorConsulta) { <p class="alert error" role="alert">{{ errorConsulta }}</p> }
+        @if (mensajeConsulta) { <p class="form-hint" role="status">{{ mensajeConsulta }}</p> }
+        @if (empresasConsultadas.length) {
+          <div class="resultados-empresas">
+            @for (empresa of empresasConsultadas; track empresa.ruc) {
+              <button type="button" class="resultado-empresa" (click)="seleccionarEmpresa(empresa)">
+                <strong>{{ empresa.razonSocial }}</strong>
+                <small>{{ empresa.ruc }} · {{ empresa.estado }} · {{ empresa.condicion }}</small>
+              </button>
+            }
+          </div>
+        }
+      </div>
+      <label>RUC de 11 dígitos</label>
+      <input [(ngModel)]="form.ruc" maxlength="11" />
+      <label>Razón social</label>
+      <input [(ngModel)]="form.razonSocial" />
+      <label>Teléfono</label>
+      <input [(ngModel)]="form.telefono" />
+      <label>Contacto</label>
+      <input [(ngModel)]="form.contacto" />
+    } @else {
+      <label>Tipo de servicio</label>
+      <input [(ngModel)]="form.nombre" />
+      <label>Descripción</label>
+      <input [(ngModel)]="form.descripcion" />
+    }
+    <button class="btn primary" (click)="guardar()">Guardar</button>
+    @if (error) {
+      <div class="alert error">{{ error }}</div>
+    }
+    @if (ok) {
+      <div class="alert ok">{{ ok }}</div>
+    }
+  </section>
+  <section class="panel">
+    <div class="panel-heading">
+      <h2>Registros disponibles</h2>
+      <span class="counter">{{ items.length }}</span>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+          <th>Identificador</th><th>Estado</th><th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (i of items; track i.id) {
+          <tr>
+            <td>#{{ i.id }}</td>
+            <td>{{ i.razonSocial || i.nombre }}</td>
+            <td>{{ i.ruc || i.descripcion }}</td>
+            <td>{{ i.estado === 'I' ? 'Inactivo' : 'Activo' }}</td>
+            <td><app-acciones-seguras [recurso]="esClientes ? 'clientes' : 'tipos-servicio'" [registro]="i" (actualizado)="cargar()" /></td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="5">No se encontraron registros</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </section>
+</div>

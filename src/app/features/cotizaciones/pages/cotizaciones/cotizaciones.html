@@ -1,0 +1,301 @@
+@if (enListado) {
+  <div class="page-title-row">
+    <h1>Registrar cotización</h1>
+    <a class="action-primary" routerLink="/cotizaciones/nueva">＋ Nueva cotización</a>
+  </div>
+  <section class="filters-card">
+    <div class="filter-large">
+      <label>Buscar cotización</label>
+      <div class="search-input">
+        <span>⌕</span>
+        <input
+          [(ngModel)]="buscar"
+          placeholder="Cliente, trabajo o número"
+          (keyup.enter)="buscarAhora()"
+        />
+      </div>
+    </div>
+    <div class="filter-small">
+      <label>Estado</label>
+      <select [(ngModel)]="filtro" (change)="buscarAhora()">
+        <option>Todos</option>
+        @for (e of estados; track e) {
+          <option>{{ e }}</option>
+        }
+      </select>
+    </div>
+    <button class="action-primary" (click)="buscarAhora()">Buscar</button>
+  </section>
+  @if (ok()) {
+    <div class="alert ok">{{ ok() }}</div>
+  }
+  @if (error()) {
+    <div class="alert error">{{ error() }}</div>
+  }
+  <div class="list-card">
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>N° COTIZACIÓN</th>
+            <th>CLIENTE</th>
+            <th>MONTO</th>
+            <th>FECHA</th>
+            <th>ESTADO</th>
+            <th>ACCIONES</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (c of paginados; track c.id) {
+            <tr>
+              <td class="table-code">COT-{{ c.id }}</td>
+              <td>{{ c.solicitud?.cliente?.razonSocial }}</td>
+              <td>S/ {{ c.monto }}</td>
+              <td>{{ c.fecha }}</td>
+              <td>
+                <span [class]="'status-chip ' + claseEstado(c.estado)">{{ c.estado }}</span>
+              </td>
+              <td>
+                <div class="row-actions">
+                  <a
+                    [routerLink]="['/cotizaciones/ver', c.id]"
+                    title="Ver cotización"
+                    aria-label="Ver cotización"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </a>
+                  @if (c.estado === 'ENVIADA' || c.estado === 'BORRADOR') {
+                    <a
+                      [routerLink]="['/cotizaciones/editar', c.id]"
+                      title="Editar cotización"
+                      aria-label="Editar cotización"
+                    >
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5 4 4M4 20l4.5-.9L20 7.6 16.4 4 4.9 15.5 4 20Z"/></svg>
+                    </a>
+                  } @else {
+                    <button disabled title="No se puede editar en este estado"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5 4 4M4 20l4.5-.9L20 7.6 16.4 4 4.9 15.5 4 20Z"/></svg></button>
+                  }
+
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="empty-row">No existen cotizaciones para mostrar.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <div class="table-footer">
+      <span>Mostrando {{ paginados.length }} de {{ filtrados.length }} cotizaciones</span>
+      <div class="pagination">
+        <button [disabled]="pagina === 1" (click)="irPagina(pagina - 1)">‹</button>
+        @for (n of paginas; track n) {
+          <button [class.current]="pagina === n" (click)="irPagina(n)">{{ n }}</button>
+        }
+        <button [disabled]="pagina === numeroPaginas" (click)="irPagina(pagina + 1)">›</button>
+      </div>
+    </div>
+  </div>
+} @else if (esDetalle) {
+  <div class="form-page">
+    <div class="detail-head">
+      <h1>Cotización N° {{ registro?.id }}</h1>
+      <a routerLink="/cotizaciones" class="action-secondary">Volver</a>
+    </div>
+    @if (registro) {
+      @if (registro.urlArchivo) { <app-documento-adjunto [url]="registro.urlArchivo" /> }
+      <div class="detail-grid">
+        <div>
+          <label>Cliente</label>
+          <strong>{{ registro.solicitud?.cliente?.razonSocial }}</strong>
+        </div>
+        <div>
+          <label>Solicitud</label>
+          <strong>#{{ registro.solicitud?.id }}</strong>
+        </div>
+        <div>
+          <label>Monto</label>
+          <strong>S/ {{ registro.monto }}</strong>
+        </div>
+        <div>
+          <label>Estado</label>
+          <span [class]="'status-chip ' + claseEstado(registro.estado)">{{ registro.estado }}</span>
+        </div>
+        <div class="full">
+          <label>Descripción del trabajo</label>
+          <p>{{ registro.descripcionTrabajo }}</p>
+        </div>
+        <div class="full">
+          <label>Detalle maestro–detalle</label>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Ítem</th>
+                  <th>Descripción</th>
+                  <th>Cantidad</th>
+                  <th>P. unitario</th>
+                  <th>Importe</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (d of registro.detalles || []; track d.id) {
+                  <tr>
+                    <td>{{ d.item }}</td>
+                    <td>{{ d.descripcion }}</td>
+                    <td>{{ d.cantidad }}</td>
+                    <td>S/ {{ d.precioUnitario }}</td>
+                    <td>S/ {{ d.subtotal }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="full">
+          <label>Observaciones</label>
+          <p>{{ registro.observaciones || 'Sin observaciones' }}</p>
+        </div>
+      </div>
+      <div class="detail-actions">
+        @if (registro.urlArchivo) {
+          <button class="action-secondary" (click)="descargarPDF(registro)">Descargar PDF</button>
+        }
+        @if (registro.estado === 'ENVIADA' || registro.estado === 'BORRADOR') {
+          <a class="action-secondary" [routerLink]="['/cotizaciones/editar', registro.id]"
+            >Editar</a
+          >
+          <button class="action-primary" (click)="estado(registro, 'ACEPTADA')">
+            Registrar aceptación
+          </button>
+          <button class="action-danger" (click)="estado(registro, 'RECHAZADA')">
+            Registrar rechazo
+          </button>
+        }
+      </div>
+      @if (ok()) {
+        <p class="alert ok">{{ ok() }}</p>
+      }
+      @if (error()) {
+        <p class="alert error">{{ error() }}</p>
+      }
+    } @else {
+      <p>Cotización no encontrada.</p>
+    }
+  </div>
+} @else {
+  <div class="form-page">
+    <h1>{{ esEdicion ? 'Editar cotización' : 'Nueva cotización' }}</h1>
+    <section class="form-section">
+      <h2>Datos de la cotización</h2>
+      <div class="form-grid">
+        <div class="full">
+          <label>Solicitud pendiente *</label>
+          <select [(ngModel)]="form.solicitudId" [disabled]="esEdicion">
+            <option [ngValue]="null">Seleccione una solicitud</option>
+            @for (s of pendientes; track s.id) {
+              <option [ngValue]="s.id">Solicitud #{{ s.id }} · {{ s.cliente?.razonSocial }}</option>
+            }
+            @if (esEdicion) {
+              <option [ngValue]="form.solicitudId">Solicitud #{{ form.solicitudId }}</option>
+            }
+          </select>
+        </div>
+      </div>
+      @if (solicitada) {
+        <div class="detail-note">
+          {{ solicitada.tipoServicio?.nombre }} — {{ solicitada.descripcion }}
+        </div>
+      }
+      <section class="form-section">
+        <div class="section-header">
+          <h2>Detalle de cotización</h2>
+          <button class="outlined-link" type="button" (click)="agregarDetalle()">
+            ＋ Agregar ítem
+          </button>
+        </div>
+        @for (d of form.detalles; track $index; let i = $index) {
+          <div class="stage-card">
+            <div class="stage-heading">
+              <strong>Ítem {{ i + 1 }}</strong>
+              <button
+                type="button"
+                class="link-danger"
+                [disabled]="form.detalles.length === 1"
+                (click)="quitarDetalle(i)"
+              >
+                Quitar
+              </button>
+            </div>
+            <div class="form-grid">
+              <div class="full">
+                <label>DESCRIPCIÓN *</label>
+                <input [(ngModel)]="d.descripcion" placeholder="Servicio o actividad" />
+              </div>
+              <div>
+                <label>CANTIDAD *</label>
+                <input type="number" min="0.01" step="0.01" [(ngModel)]="d.cantidad" />
+              </div>
+              <div>
+                <label>PRECIO UNITARIO (S/) *</label>
+                <input type="number" min="0" step="0.01" [(ngModel)]="d.precioUnitario" />
+              </div>
+              <div>
+                <label>UNIDAD DE MEDIDA</label>
+                <input [(ngModel)]="d.unidadMedida" />
+              </div>
+              <div>
+                <label>IMPORTE</label>
+                <input
+                  [value]="(d.cantidad * d.precioUnitario).toFixed(2)"
+                  readonly
+                  class="readonly-input"
+                />
+              </div>
+            </div>
+          </div>
+        }
+        <div class="detail-note">
+          Subtotal: S/ {{ subtotal.toFixed(2) }} · IGV (18%): S/ {{ igv.toFixed(2) }} ·
+          <strong>Total: S/ {{ monto.toFixed(2) }}</strong>
+        </div>
+      </section>
+      <div class="field-block">
+        <label>ADJUNTAR COTIZACIÓN PDF (OPCIONAL)</label>
+        <input type="file" accept=".pdf,application/pdf" (change)="archivo($event)" />
+        @if (esEdicion && registro?.urlArchivo && !quitarPdf) { <app-documento-adjunto [url]="registro.urlArchivo" [permitirQuitar]="true" (quitar)="quitarPdf=true" /> }
+        @if (quitarPdf) { <button type="button" class="action-secondary" (click)="quitarPdf=false">Conservar PDF anterior</button> }
+        <app-documento-adjunto [archivo]="pdf" [permitirQuitar]="true" (quitar)="pdf = null" />
+        @if (extrayendoPdf) { <p class="form-hint" role="status">Analizando texto del PDF...</p> }
+        @if (avisoExtraccion) { <p class="form-hint" role="status">{{ avisoExtraccion }}</p> }
+        @if (propuestasPdf.length) {
+          <div class="preview-extraccion">
+            <strong>Detalles sugeridos ({{ propuestasPdf.length }})</strong>
+            @for (d of propuestasPdf; track $index) {
+              <p>{{ d.descripcion }} · {{ d.cantidad }} × S/ {{ d.precioUnitario }}</p>
+            }
+            <button type="button" class="action-secondary" (click)="aplicarPdf()">Aplicar detalles al formulario</button>
+          </div>
+        }
+        @if (vistaPreviaPdf && !propuestasPdf.length) {
+          <details class="preview-extraccion"><summary>Ver texto extraído</summary><pre>{{ vistaPreviaPdf }}</pre></details>
+        }
+      </div>
+      <div class="field-block">
+        <label>OBSERVACIONES</label>
+        <textarea [(ngModel)]="form.observaciones" rows="3"></textarea>
+      </div>
+    </section>
+    @if (error()) {
+      <div class="alert error">{{ error() }}</div>
+    }
+    <div class="form-actions">
+      <a class="action-secondary" routerLink="/cotizaciones">Cancelar</a>
+      <button class="action-primary" [disabled]="guardando()" (click)="guardar()">
+        {{ esEdicion ? 'Guardar cambios' : 'Guardar cotización' }}
+      </button>
+    </div>
+  </div>
+}

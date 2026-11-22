@@ -1,0 +1,219 @@
+@if (enListado) {
+  <div class="page-title-row">
+    <h1>Registrar solicitud</h1>
+    <a class="action-primary" routerLink="/solicitudes/nueva">
+      <span aria-hidden="true">＋</span>
+      Nueva solicitud
+    </a>
+  </div>
+  <section class="filters-card">
+    <div class="filter-large">
+      <label for="busca-sol">Búsqueda rápida</label>
+      <div class="search-input">
+        <span aria-hidden="true">⌕</span>
+        <input
+          id="busca-sol"
+          [(ngModel)]="buscar"
+          (keyup.enter)="buscarAhora()"
+          placeholder="Buscar por cliente o descripción"
+        />
+      </div>
+    </div>
+    <div class="filter-small">
+      <label for="estado-sol">Estado</label>
+      <select id="estado-sol" [(ngModel)]="filtro" (change)="buscarAhora()">
+        <option>Todos</option>
+        @for (e of estados; track e) {
+          <option>{{ e }}</option>
+        }
+      </select>
+    </div>
+    <button class="action-primary" (click)="buscarAhora()">Buscar</button>
+  </section>
+  @if (error()) {
+    <div class="alert error">{{ error() }}</div>
+  }
+  <div class="list-card">
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>N° SOLICITUD</th>
+            <th>CLIENTE</th>
+            <th>TIPO DE SERVICIO</th>
+            <th>FECHA RECEPCIÓN</th>
+            <th>ESTADO</th>
+            <th>ACCIONES</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (i of paginados; track i.id) {
+            <tr>
+              <td class="table-code">{{ codigo(i) }}</td>
+              <td>{{ i.cliente?.razonSocial }}</td>
+              <td>{{ i.tipoServicio?.nombre }}</td>
+              <td>{{ i.fechaRecepcion }}</td>
+              <td>
+                <span class="status-chip" [class]="'status-chip ' + claseEstado(i.estado)">{{
+                  i.estado
+                }}</span>
+              </td>
+              <td>
+                <div class="row-actions">
+                  <a
+                    title="Ver solicitud"
+                    [routerLink]="['/solicitudes/ver', i.id]"
+                    aria-label="Ver solicitud"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </a>
+
+                  <app-acciones-seguras [mostrarVer]="false" recurso="solicitudes" [registro]="i" (actualizado)="actualizarListado('/solicitudes')" />
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="empty-row">No se encontraron solicitudes.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <div class="table-footer">
+      <span>Mostrando {{ paginados.length }} de {{ filtrados.length }} solicitudes</span>
+      <div class="pagination">
+        <button (click)="irPagina(pagina - 1)" [disabled]="pagina === 1">‹</button>
+        @for (n of paginas; track n) {
+          <button (click)="irPagina(n)" [class.current]="n === pagina">{{ n }}</button>
+        }
+        <button (click)="irPagina(pagina + 1)" [disabled]="pagina === numeroPaginas">›</button>
+      </div>
+    </div>
+  </div>
+} @else if (vista === 'nuevo' || esEdicion) {
+  <div class="form-page">
+    <h1>{{ esEdicion ? 'Editar solicitud de servicio' : 'Nueva solicitud de servicio' }}</h1>
+    @if (esEdicion) { <p class="detail-note">El cliente y el tipo de servicio quedan bloqueados. Solo pueden corregirse descripción, observaciones y documento antes de cotizar.</p> }
+    <section class="form-section">
+      <h2>Buscar cliente</h2>
+      <input
+        aria-label="Buscar cliente"
+        [(ngModel)]="filtroCliente"
+        placeholder="Busque por razón social o RUC"
+      />
+      <label for="cliente-sol">Seleccione un cliente *</label>
+      <select id="cliente-sol" [(ngModel)]="form.clienteId" [disabled]="esEdicion">
+        <option [ngValue]="null">Seleccione un cliente</option>
+        @if (esEdicion && form.clienteId) { <option [ngValue]="form.clienteId">{{ registro?.cliente?.razonSocial || 'Cliente registrado' }}</option> }
+        @for (c of clientesFiltrados; track c.id) {
+          <option [ngValue]="c.id">{{ c.razonSocial }} · {{ c.ruc }}</option>
+        }
+      </select>
+      <a routerLink="/clientes" class="outlined-link">Ir a Parámetros / Gestionar clientes →</a>
+    </section>
+    <section class="form-section">
+      <h2>Datos de la solicitud</h2>
+      <div class="form-grid">
+        <div>
+          <label for="tipo-sol">TIPO DE SERVICIO *</label>
+          <select id="tipo-sol" [(ngModel)]="form.tipoServicioId" [disabled]="esEdicion">
+            <option [ngValue]="null">Seleccione un servicio</option>
+            @if (esEdicion && form.tipoServicioId) { <option [ngValue]="form.tipoServicioId">{{ registro?.tipoServicio?.nombre || 'Servicio registrado' }}</option> }
+            @for (t of tiposActivos; track t.id) {
+              <option [ngValue]="t.id">{{ t.nombre }}</option>
+            }
+          </select>
+        </div>
+        <div>
+          <label for="fecha-sol">FECHA DE RECEPCIÓN</label>
+          <input id="fecha-sol" [value]="fechaHoy" readonly class="readonly-input" />
+        </div>
+        <div>
+          <label for="estatus-sol">ESTADO INICIAL</label>
+          <input id="estatus-sol" value="Pendiente" readonly class="readonly-input" />
+        </div>
+      </div>
+      <div class="field-block">
+        <label for="desc-sol">DESCRIPCIÓN DEL TRABAJO SOLICITADO *</label>
+        <textarea
+          id="desc-sol"
+          [(ngModel)]="form.descripcion"
+          rows="5"
+          placeholder="Detalle los requerimientos específicos del trabajo..."
+        ></textarea>
+      </div>
+      <div class="field-block">
+        <label>DOCUMENTO SOLICITUD (PDF, OPCIONAL)</label>
+        <input type="file" accept=".pdf,application/pdf" (change)="archivo($event)" />
+        @if (esEdicion && registro?.urlArchivo && !quitarPdf) {
+          <app-documento-adjunto [url]="registro.urlArchivo" [permitirQuitar]="true" (quitar)="quitarPdf = true" />
+        }
+        @if (quitarPdf) { <button class="action-secondary" type="button" (click)="quitarPdf = false">Conservar el archivo anterior</button> }
+        <app-documento-adjunto [archivo]="pdf" [permitirQuitar]="true" (quitar)="pdf = null" />
+      </div>
+      <div class="field-block">
+        <label for="obs-sol">OBSERVACIONES INICIALES</label>
+        <textarea
+          id="obs-sol"
+          [(ngModel)]="form.observaciones"
+          rows="2"
+          placeholder="Comentarios adicionales o notas de campo"
+        ></textarea>
+      </div>
+    </section>
+    @if (error()) {
+      <div class="alert error" role="alert">{{ error() }}</div>
+    }
+    <div class="form-actions">
+      <a class="action-secondary" routerLink="/solicitudes">Cancelar</a>
+      <button class="action-primary" [disabled]="guardando()" (click)="guardar()">
+        {{ guardando() ? 'Guardando...' : (esEdicion ? 'Guardar cambios' : 'Guardar solicitud') }}
+      </button>
+    </div>
+  </div>
+} @else {
+  <div class="form-page">
+    <div class="detail-head">
+      <h1>Detalle de solicitud {{ registro ? codigo(registro) : '' }}</h1>
+      <a class="action-secondary" routerLink="/solicitudes">Volver al listado</a>
+    </div>
+    @if (registro) {
+      @if (registro.urlArchivo) { <app-documento-adjunto [url]="registro.urlArchivo" /> }
+      <div class="detail-grid">
+        <div>
+          <label>Cliente</label>
+          <strong>{{ registro.cliente?.razonSocial }}</strong>
+        </div>
+        <div>
+          <label>RUC</label>
+          <strong>{{ registro.cliente?.ruc }}</strong>
+        </div>
+        <div>
+          <label>Tipo de servicio</label>
+          <strong>{{ registro.tipoServicio?.nombre }}</strong>
+        </div>
+        <div>
+          <label>Fecha de recepción</label>
+          <strong>{{ registro.fechaRecepcion }}</strong>
+        </div>
+        <div>
+          <label>Estado</label>
+          <span class="status-chip" [class]="'status-chip ' + claseEstado(registro.estado)">{{
+            registro.estado
+          }}</span>
+        </div>
+        <div class="full">
+          <label>Descripción</label>
+          <p>{{ registro.descripcion }}</p>
+        </div>
+        <div class="full">
+          <label>Observaciones</label>
+          <p>{{ registro.observaciones || 'Sin observaciones' }}</p>
+        </div>
+      </div>
+    } @else {
+      <p>La solicitud indicada no se encontró.</p>
+    }
+  </div>
+}

@@ -1,0 +1,18 @@
+.gestiones{max-width:340px}.gestiones-botones{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.gestiones-botones button,.gestion-final button,.gestion-titulo button{font:inherit;cursor:pointer;border-radius:5px;border:1px solid #bed2d7;padding:5px 8px;background:#fff;color:#075c67}
+.gestiones-botones .gestion-editar,.gestion-final .gestion-editar{background:#006e78;color:white;border-color:#006e78}
+.gestiones-botones button:disabled{opacity:.5;cursor:wait}
+.gestion-error,.gestion-ok{font-size:12px;line-height:1.4;margin:5px 0;max-width:340px}.gestion-error{color:#b52121}.gestion-ok{color:#146b39}
+.gestion-modal{border:1px solid #d6e3e7;border-radius:10px;padding:23px;width:min(520px,90vw);max-height:85vh;overflow-y:auto;box-shadow:0 15px 48px #102e3955;color:#20383f}
+.gestion-modal::backdrop{background:#071b28aa}.gestion-titulo,.gestion-final{display:flex;justify-content:space-between;align-items:center;gap:15px}
+.gestion-titulo h3{margin:0 0 14px;font-size:19px}.gestion-titulo button{font-size:22px;line-height:1}
+.gestion-aviso{padding:10px;background:#f4f7f8;border-left:3px solid #006e78;font-size:13px;line-height:1.6}
+.gestion-campo{display:flex;flex-direction:column;gap:5px;margin:12px 0;font-size:13px;font-weight:600}
+.gestion-campo input,.gestion-campo textarea{width:100%;box-sizing:border-box;padding:9px;border:1px solid #aabbc0;border-radius:6px;font:inherit;font-weight:400}
+.gestion-valor{font-size:14px;font-weight:400;color:#36505a;white-space:pre-wrap;overflow-wrap:anywhere}
+.gestion-final{justify-content:flex-end;margin-top:20px}
+
+.gestiones-botones button { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 5px; background: transparent; border: 0; color: #085867; }
+.gestiones-botones .gestion-editar { background: transparent; border: 0; color: #085867; }
+.gestiones-botones button:hover { color: #0bb4b3; background: #f0f7f8; }
+.gestiones-botones button svg { display: block; width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }

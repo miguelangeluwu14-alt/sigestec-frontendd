@@ -1,0 +1,80 @@
+.consulta-empresa { padding: 12px; border: 1px solid #d9e7e9; border-radius: 9px; background: #f8fbfc; }
+.consulta-empresa .input-group { display: flex; gap: 8px; }
+.consulta-empresa input.form-control { flex: 1; min-width: 0; padding: 10px; border-radius: 6px; border: 1px solid #aebfc5; }
+.consulta-empresa button.btn { white-space: nowrap; border: 1px solid #006773; padding: 9px 15px; color: #006773; border-radius: 6px; }
+.resultados-empresas { max-height: 240px; overflow: auto; margin: 12px 0 0; border: 1px solid #d1e0e3; border-radius: 8px; }
+.resultado-empresa { display: flex; flex-direction: column; align-items: flex-start; width: 100%; padding: 10px 12px; border: 0; border-bottom: 1px solid #e4eef0; background: white; color: #29414a; text-align: left; }
+.resultado-empresa:hover { background: #eaf6f6; }
+.resultado-empresa small { display: block; margin-top: 3px; color: #53656c; }
+.form-hint { font-size: 12px; color: #47717b; line-height: 1.5; margin: 8px 0; }
+.preview-extraccion { background: #f5fafb; padding: 15px; margin-top: 10px; border-radius: 9px; border: 1px solid #d8e8eb; }
+.preview-extraccion p { margin: 7px 0; font-size: 13px; }
+.preview-extraccion pre { max-width: 100%; overflow: auto; white-space: pre-wrap; font-size: 12px; }
+.recovery-confirmation { padding: 20px 16px; text-align: center; }
+.recovery-confirmation-icon { width: 56px; height: 56px; margin: 0 auto 16px; border-radius: 50%; background: #e7f5f2; color: #116958; display: grid; place-items: center; font-size: 28px; font-weight: 800; }
+.recovery-confirmation h2 { font-size: 21px; color: #0b5964; }
+.recovery-confirmation p { line-height: 1.7; font-size: 14px; color: #465f67; }
+.recovery-security-note { background: #f2f7f8; padding: 10px; border-radius: 8px; }
+.recovery-confirmation small { color: #5b6b71; }
+@media (max-width: 575px) { .consulta-empresa .input-group { flex-direction: column; } }
+
+/* ACCIONES DE TABLA SIGESTEC: únicamente ojo y lápiz, sin botones de descarga. */
+.data-table .row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+}
+.data-table .row-actions .gestiones,
+.data-table .row-actions .gestiones-botones {
+  max-width: none;
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 10px;
+}
+.data-table .row-actions > a,
+.data-table .row-actions > button,
+.data-table .row-actions .gestiones-botones button,
+.data-table .row-actions .accion-ver-detalle {
+  display: inline-flex !important;
+  flex: 0 0 26px;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 26px !important;
+  height: 26px !important;
+  min-width: 26px;
+  min-height: 26px;
+  margin: 0;
+  padding: 2px !important;
+  border: 0 !important;
+  border-radius: 4px;
+  color: #076778 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  text-decoration: none !important;
+  cursor: pointer;
+}
+.data-table .row-actions svg,
+.data-table .row-actions .gestiones-botones svg {
+  display: block !important;
+  flex: 0 0 20px;
+  width: 20px !important;
+  height: 20px !important;
+  max-width: 20px !important;
+  max-height: 20px !important;
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 1.8 !important;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.data-table .row-actions > a:hover,
+.data-table .row-actions .gestiones-botones button:hover {
+  background: #e9f5f6 !important;
+}
+.data-table .row-actions :is(a, button):focus-visible {
+  outline: 2px solid #0a7781;
+  outline-offset: 2px;
+}

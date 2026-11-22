@@ -1,0 +1,8 @@
+.documento-adjunto {margin:12px 0;padding:12px;border:1px solid #d9e2ee;border-radius:10px;background:#f9fbfd}
+.documento-barra {display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.documento-nombre {flex:1 1 180px;min-width:0;overflow-wrap:anywhere;font-size:0.93rem;font-weight:600}
+.documento-barra button {cursor:pointer;padding:7px 10px;border-radius:6px}
+.documento-quitar {color:#a82525;border:1px solid #dcaaaa;background:#fff}
+.documento-vista {display:block;width:100%;min-height:400px;height:55vh;max-height:720px;margin-top:12px;border:1px solid #dde4ee;border-radius:8px;background:white}
+
+.documento-imagen { height:auto; min-height:0; max-height:70vh; object-fit:contain; padding:10px; box-sizing:border-box; }

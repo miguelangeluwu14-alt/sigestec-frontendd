@@ -1,0 +1,30 @@
+<div class="login-page">
+  <div class="login-content">
+    <img src="/acoiel-logo.png" class="login-logo" alt="ACOIEL SAC" />
+    <section class="recovery-card">
+      <h1>Recuperar contraseña</h1>
+      @if (enviado()) {
+        <div class="recovery-confirmation" role="status">
+          <div class="recovery-confirmation-icon" aria-hidden="true">✓</div>
+          <h2>Revisa tu correo</h2>
+          <p>Si el usuario tiene un correo autorizado, recibirá un enlace temporal para crear una nueva contraseña.</p>
+          <p class="recovery-security-note">El enlace dura 15 minutos y solo puede utilizarse una vez.</p>
+          <small>Comprueba también Spam o Correo no deseado.</small>
+        </div>
+      } @else {
+        <p class="recovery-muted">Escribe el usuario con el que inicias sesión en SIGESTEC.
+          Te enviaremos un enlace de recuperación al correo autorizado.</p>
+        <form (ngSubmit)="enviar()">
+          <label for="recuperar-usuario">Nombre de usuario</label>
+          <input id="recuperar-usuario" type="text" name="usuario" [(ngModel)]="username"
+            autocomplete="username" maxlength="60" required placeholder="Ejemplo: ssoma" />
+          @if (error()) { <p class="recovery-error" role="alert">{{ error() }}</p> }
+          <button class="recovery-submit" type="submit" [disabled]="enviando()">
+            {{ enviando() ? 'Procesando...' : 'Enviar enlace de recuperación' }}
+          </button>
+        </form>
+      }
+      <a routerLink="/login" class="recovery-back">Volver a iniciar sesión</a>
+    </section>
+  </div>
+</div>

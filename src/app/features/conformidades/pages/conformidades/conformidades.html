@@ -1,0 +1,192 @@
+@if (enListado) {
+  <div class="page-title-row">
+    <h1>Conformidad del servicio</h1>
+    <a class="action-primary" routerLink="/conformidades/nueva">＋ Nueva conformidad</a>
+  </div>
+  <section class="filters-card">
+    <div class="filter-large">
+      <label>Búsqueda rápida</label>
+      <div class="search-input">
+        <span>⌕</span>
+        <input
+          [(ngModel)]="buscar"
+          (input)="buscarAhora()"
+          placeholder="Número de acta, OT, cliente"
+        />
+      </div>
+    </div>
+  </section>
+  <section class="list-card">
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ACTA</th>
+            <th>OT</th>
+            <th>CLIENTE</th>
+            <th>FECHA</th>
+            <th>RESULTADO</th>
+            <th>ACCIÓN</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (c of paginados; track c.id) {
+            <tr>
+              <td class="table-code">{{ c.numeroActa }}</td>
+              <td>OT-{{ c.ordenTrabajo?.id }}</td>
+              <td>{{ c.ordenTrabajo?.solicitud?.cliente?.razonSocial }}</td>
+              <td>{{ c.fechaConformidad }}</td>
+              <td>
+                <span [class]="'status-chip ' + claseEstado(c.estadoConformidad)">{{
+                  c.estadoConformidad
+                }}</span>
+              </td>
+              <td>
+                <div class="row-actions">
+                  <a [routerLink]="['/conformidades/ver', c.id]" class="accion-ver-detalle" title="Ver detalles" aria-label="Ver detalles"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></a>
+                </div>
+
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="empty-row">No hay actas de conformidad.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <div class="table-footer">
+      <span>{{ filtrados.length }} actas</span>
+      <div class="pagination">
+        <button [disabled]="pagina === 1" (click)="irPagina(pagina - 1)">‹</button>
+        @for (n of paginas; track n) {
+          <button [class.current]="n === pagina" (click)="irPagina(n)">{{ n }}</button>
+        }
+      </div>
+    </div>
+  </section>
+  @if (error()) {
+    <p class="alert error">{{ error() }}</p>
+  }
+} @else if (esDetalle) {
+  <div class="form-page">
+    <div class="detail-head">
+      <h1>Acta {{ registro?.numeroActa }}</h1>
+      <a class="action-secondary" routerLink="/conformidades">Volver</a>
+    </div>
+    @if (registro) {
+      @if (registro.urlArchivo) { <app-documento-adjunto [url]="registro.urlArchivo" /> }
+      <div class="detail-grid">
+        <div>
+          <label>OT</label>
+          <strong>OT-{{ registro.ordenTrabajo?.id }}</strong>
+        </div>
+        <div>
+          <label>Fecha</label>
+          <strong>{{ registro.fechaConformidad }}</strong>
+        </div>
+        <div>
+          <label>Representante del cliente</label>
+          <strong>{{ registro.nombreRepresentante }}</strong>
+        </div>
+        <div>
+          <label>Valoración</label>
+          <strong>{{ registro.valoracion }} / 5</strong>
+        </div>
+        <div>
+          <label>Estado</label>
+          <strong>{{ registro.estadoConformidad }}</strong>
+        </div>
+        <div class="full">
+          <label>Observaciones</label>
+          <p>{{ registro.observaciones }}</p>
+        </div>
+        <div class="full">
+          <label>Acta adjunta</label>
+          <button class="outlined-link" (click)="descargar(registro)">Descargar acta</button>
+        </div>
+      </div>
+    }
+  </div>
+} @else {
+  <div class="form-page">
+    <div class="detail-head">
+      <h1>Registrar conformidad del servicio</h1>
+      <a class="action-secondary" routerLink="/conformidades">Volver</a>
+    </div>
+    <section class="form-section">
+      <h2>Informe y acta del cliente</h2>
+      <div class="form-grid">
+        <div class="full">
+          <label>OT CON INFORME ENVIADO *</label>
+          <select [(ngModel)]="form.ordenTrabajoId">
+            <option [ngValue]="null">Seleccione una OT</option>
+            @for (i of elegibles; track i.id) {
+              <option [ngValue]="i.ordenTrabajo?.id">
+                OT-{{ i.ordenTrabajo?.id }} · {{ i.ordenTrabajo?.solicitud?.cliente?.razonSocial }}
+              </option>
+            }
+          </select>
+        </div>
+        <div>
+          <label>NÚMERO DE ACTA *</label>
+          <input [(ngModel)]="form.numeroActa" maxlength="50" />
+        </div>
+        <div>
+          <label>FECHA DE CONFORMIDAD *</label>
+          <input type="date" [(ngModel)]="form.fechaConformidad" />
+        </div>
+        <div class="full">
+          <label>REPRESENTANTE DEL CLIENTE QUE FIRMA *</label>
+          <input [(ngModel)]="form.nombreRepresentante" maxlength="250" />
+        </div>
+        <div>
+          <label>ESTADO DE CONFORMIDAD *</label>
+          <select [(ngModel)]="form.estadoConformidad">
+            <option value="CONFORME">CONFORME</option>
+            <option value="OBSERVADA">OBSERVADA</option>
+          </select>
+        </div>
+        <div>
+          <label>VALORACIÓN (1 A 5)</label>
+          <select [(ngModel)]="form.valoracion">
+            <option [ngValue]="1">1</option>
+            <option [ngValue]="2">2</option>
+            <option [ngValue]="3">3</option>
+            <option [ngValue]="4">4</option>
+            <option [ngValue]="5">5</option>
+          </select>
+        </div>
+        <div class="full">
+          <label>OBSERVACIONES</label>
+          <textarea [(ngModel)]="form.observaciones" rows="3"></textarea>
+        </div>
+        <div class="full">
+          <label>ACTA FIRMADA (PDF, PNG O JPG) *</label>
+          <input
+            type="file"
+            accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/*"
+            (change)="archivo($event)"
+          />
+          <app-documento-adjunto [archivo]="acta" [permitirQuitar]="true" (quitar)="acta=null" />
+        </div>
+      </div>
+      @if (actual) {
+        <p class="detail-note">
+          Informe: {{ actual.numeroInforme }} · Enviado: {{ actual.fechaEnvio }} · Cliente:
+          {{ actual.ordenTrabajo?.solicitud?.cliente?.razonSocial }}
+        </p>
+      }
+    </section>
+    @if (error()) {
+      <p class="alert error">{{ error() }}</p>
+    }
+    <div class="form-actions">
+      <a class="action-secondary" routerLink="/conformidades">Cancelar</a>
+      <button [disabled]="guardando()" class="action-primary" (click)="guardar()">
+        Registrar conformidad
+      </button>
+    </div>
+  </div>
+}

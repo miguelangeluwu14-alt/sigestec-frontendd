@@ -1,0 +1,61 @@
+<div class="login-page">
+  <div class="login-content">
+    <img
+      src="/acoiel-logo.png"
+      class="login-logo"
+      alt="ACOIEL SAC - Ingeniería Eléctrica y Automatización"
+    />
+    <form class="login-form" (ngSubmit)="entrar()">
+      <label for="usuario">USUARIO</label>
+      <div class="login-field">
+        <span aria-hidden="true">♙</span>
+        <input
+          id="usuario"
+          name="usuario"
+          type="text"
+          placeholder="Ingrese su usuario"
+          [(ngModel)]="username"
+          autocomplete="username"
+          required
+        />
+      </div>
+      <label for="contrasena">CONTRASEÑA</label>
+      <div class="login-field">
+        <span aria-hidden="true">♧</span>
+        <input
+          id="contrasena"
+          name="contrasena"
+          [type]="mostrar ? 'text' : 'password'"
+          placeholder="Ingrese su contraseña"
+          [(ngModel)]="password"
+          autocomplete="current-password"
+          required
+        />
+        <button
+          type="button"
+          class="password-eye"
+          [attr.aria-label]="mostrar ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+          (click)="mostrar = !mostrar"
+        >
+          {{ mostrar ? '◉' : '◎' }}
+        </button>
+      </div>
+      <button class="login-submit" [disabled]="cargando()" type="submit">
+        {{ cargando() ? 'Ingresando...' : 'Iniciar Sesión' }}
+        <span aria-hidden="true">➜</span>
+      </button>
+      <a class="forgot-password" routerLink="/recuperar-clave">¿Olvidaste tu contraseña?</a>
+      @if (error()) {
+        <p role="alert" class="login-error">{{ error() }}</p>
+      }
+    </form>
+    <div class="login-info">
+      <span class="info-circle" aria-hidden="true">ⓘ</span>
+      <p>
+        <strong>ACOIEL SAC</strong>
+        es una empresa especializada en servicios de ingeniería eléctrica, mantenimiento industrial
+        e instalaciones eléctricas para diversos sectores empresariales.
+      </p>
+    </div>
+  </div>
+</div>

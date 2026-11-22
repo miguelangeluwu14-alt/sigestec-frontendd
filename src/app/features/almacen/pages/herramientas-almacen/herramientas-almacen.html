@@ -1,0 +1,233 @@
+@if (listado) {
+  <div class="page-title-row">
+    <h1>Préstamos y devoluciones de herramientas</h1>
+    <div class="detail-actions">
+      <a class="action-secondary" routerLink="/almacen/herramientas/nueva">＋ Nueva herramienta</a>
+      <a class="action-primary" routerLink="/almacen/herramientas/movimiento"
+        >＋ Registrar movimiento</a
+      >
+    </div>
+  </div>
+  <section class="filters-card">
+    <div class="filter-large">
+      <label>Buscar herramienta</label>
+      <div class="search-input">
+        <span>⌕</span>
+        <input [(ngModel)]="buscar" (input)="buscarAhora()" placeholder="Código o nombre" />
+      </div>
+    </div>
+  </section>
+  <section class="list-card">
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>CÓDIGO</th>
+            <th>HERRAMIENTA</th>
+            <th>TOTAL</th>
+            <th>DISPONIBLE</th>
+            <th>ESTADO</th>
+            <th>ACCIONES</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (h of paginados; track h.id) {
+            <tr>
+              <td class="table-code">{{ h.codigo }}</td>
+              <td>{{ h.nombre }}</td>
+              <td>{{ h.cantidadTotal }}</td>
+              <td>{{ h.cantidadDisponible }}</td>
+              <td>
+                <span
+                  [class]="
+                    'status-chip ' +
+                    (h.cantidadDisponible > 0 ? 'estado-exito' : 'estado-pendiente')
+                  "
+                >
+                  {{ h.cantidadDisponible > 0 ? 'DISPONIBLE' : 'SIN STOCK' }}
+                </span>
+              </td>
+                          <td><app-acciones-seguras recurso="herramientas" [registro]="h" (actualizado)="actualizarListado('/almacen/herramientas')" /></td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="empty-row">Sin herramientas registradas.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <div class="table-footer">
+      <span>{{ filtrados.length }} herramientas</span>
+      <div class="pagination">
+        <button [disabled]="pagina === 1" (click)="irPagina(pagina - 1)">‹</button>
+        @for (n of paginas; track n) {
+          <button [class.current]="n === pagina" (click)="irPagina(n)">{{ n }}</button>
+        }
+      </div>
+    </div>
+  </section>
+  <section class="form-section" style="margin-top: 25px">
+    <h2>Historial de movimientos</h2>
+    <section class="list-card">
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>FECHA</th>
+              <th>TIPO</th>
+              <th>HERRAMIENTA</th>
+              <th>CANT.</th>
+              <th>OT</th>
+              <th>RESPONSABLE</th>
+              <th>ESTADO</th><th>VER</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (m of movimientos(); track m.id) {
+              <tr>
+                <td>{{ m.fechaMovimiento?.slice(0, 16) }}</td>
+                <td>{{ m.tipoMovimiento }}</td>
+                <td>{{ m.herramienta?.nombre }}</td>
+                <td>{{ m.cantidad }}</td>
+                <td>{{ m.ordenTrabajoId ? 'OT-' + m.ordenTrabajoId : '—' }}</td>
+                <td>{{ m.empleadoResponsable?.nombre || '—' }}</td>
+                <td>{{ m.estadoDevolucion || '—' }}</td>
+                <td><app-acciones-seguras recurso="movimientos-herramientas" [registro]="m" /></td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="8" class="empty-row">No hay préstamos o devoluciones.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </section>
+  @if (error()) {
+    <p class="alert error">{{ error() }}</p>
+  }
+} @else if (nuevoHerramienta) {
+  <div class="form-page">
+    <div class="detail-head">
+      <h1>Nueva herramienta</h1>
+      <a class="action-secondary" routerLink="/almacen/herramientas">Volver</a>
+    </div>
+    <section class="form-section">
+      <h2>Datos de herramienta y equipo</h2>
+      <div class="form-grid">
+        <div>
+          <label>CÓDIGO *</label>
+          <input [(ngModel)]="nuevo.codigo" maxlength="30" />
+        </div>
+        <div>
+          <label>NOMBRE *</label>
+          <input [(ngModel)]="nuevo.nombre" maxlength="180" />
+        </div>
+        <div class="full">
+          <label>DESCRIPCIÓN</label>
+          <textarea [(ngModel)]="nuevo.descripcion" rows="3"></textarea>
+        </div>
+        <div>
+          <label>CANTIDAD INICIAL *</label>
+          <input type="number" min="0" step="0.01" [(ngModel)]="nuevo.cantidadInicial" />
+        </div>
+      </div>
+    </section>
+    @if (error()) {
+      <p class="alert error">{{ error() }}</p>
+    }
+    <div class="form-actions">
+      <a class="action-secondary" routerLink="/almacen/herramientas">Cancelar</a>
+      <button class="action-primary" [disabled]="guardando()" (click)="guardarHerramienta()">
+        Guardar herramienta
+      </button>
+    </div>
+  </div>
+} @else {
+  <div class="form-page">
+    <div class="detail-head">
+      <h1>Movimiento de herramienta</h1>
+      <a class="action-secondary" routerLink="/almacen/herramientas">Volver</a>
+    </div>
+    <section class="form-section">
+      <h2>Ingreso, préstamo o devolución</h2>
+      <div class="form-grid">
+        <div>
+          <label>TIPO DE MOVIMIENTO *</label>
+          <select [(ngModel)]="mov.tipoMovimiento">
+            <option value="PRESTAMO">PRÉSTAMO</option>
+            <option value="DEVOLUCION">DEVOLUCIÓN</option>
+            <option value="INGRESO">INGRESO / REPOSICIÓN</option>
+          </select>
+        </div>
+        <div>
+          <label>HERRAMIENTA *</label>
+          <select [(ngModel)]="mov.herramientaId">
+            <option [ngValue]="null">Seleccione herramienta</option>
+            @for (h of items(); track h.id) {
+              <option [ngValue]="h.id">
+                {{ h.nombre }} ({{ h.cantidadDisponible }} disponibles)
+              </option>
+            }
+          </select>
+        </div>
+        @if (mov.tipoMovimiento !== 'INGRESO') {
+          <div>
+            <label>ORDEN DE TRABAJO *</label>
+            <select [(ngModel)]="mov.ordenTrabajoId">
+              <option [ngValue]="null">Seleccione OT</option>
+              @for (o of ordenes(); track o.id) {
+                <option [ngValue]="o.id">
+                  OT-{{ o.id }} · {{ o.solicitud?.cliente?.razonSocial }}
+                </option>
+              }
+            </select>
+          </div>
+          <div>
+            <label>TÉCNICO RESPONSABLE *</label>
+            <select [(ngModel)]="mov.empleadoResponsableId">
+              <option [ngValue]="null">Seleccione técnico</option>
+              @for (e of tecnicos; track e.id) {
+                <option [ngValue]="e.id">{{ e.nombre }}</option>
+              }
+            </select>
+          </div>
+        }
+        <div>
+          <label>CANTIDAD *</label>
+          <input type="number" min="0.01" step="0.01" [(ngModel)]="mov.cantidad" />
+        </div>
+        @if (mov.tipoMovimiento === 'DEVOLUCION') {
+          <div>
+            <label>ESTADO AL DEVOLVER *</label>
+            <select [(ngModel)]="mov.estadoDevolucion">
+              <option value="BUENO">BUENO</option>
+              <option value="DANADO">DAÑADO — no vuelve a disponible</option>
+            </select>
+          </div>
+        }
+        <div class="full">
+          <label>OBSERVACIONES</label>
+          <textarea rows="3" [(ngModel)]="mov.observacion"></textarea>
+        </div>
+      </div>
+      @if (seleccion) {
+        <p class="detail-note">
+          Cantidad total: {{ seleccion.cantidadTotal }} · Disponible:
+          {{ seleccion.cantidadDisponible }}
+        </p>
+      }
+    </section>
+    @if (error()) {
+      <p class="alert error">{{ error() }}</p>
+    }
+    <div class="form-actions">
+      <a class="action-secondary" routerLink="/almacen/herramientas">Cancelar</a>
+      <button class="action-primary" [disabled]="guardando()" (click)="guardarMovimiento()">
+        Registrar movimiento
+      </button>
+    </div>
+  </div>
+}

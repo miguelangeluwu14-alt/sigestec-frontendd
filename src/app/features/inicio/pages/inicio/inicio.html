@@ -1,0 +1,23 @@
+@if (ruta.snapshot.data['denegado']) {
+  <div class="page-heading">
+    <h1>Acceso denegado</h1>
+    <p>Tu rol no tiene permiso para esta operación.</p>
+  </div>
+} @else {
+  <div class="page-heading">
+    <h1>Panel de control</h1>
+  </div>
+  <div class="cards">
+    @for (modulo of modulos; track modulo.ruta) {
+      @if (auth.puede(modulo.roles)) {
+        <a
+          class="feature-card"
+          [routerLink]="modulo.ruta"
+          [attr.aria-label]="'Abrir ' + modulo.nombre"
+        >
+          <h2>{{ modulo.nombre }}</h2>
+        </a>
+      }
+    }
+  </div>
+}

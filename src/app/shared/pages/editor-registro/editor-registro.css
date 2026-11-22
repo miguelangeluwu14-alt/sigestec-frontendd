@@ -1,0 +1,5 @@
+.editor-registro {max-width:1000px;margin-inline:auto}
+.editor-aviso {color:#54657a;font-size:.9rem;line-height:1.5;margin:8px 0 14px}
+.editor-campo label {display:block;margin-bottom:6px;font-weight:650}
+.editor-campo input,.editor-campo textarea {width:100%;max-width:100%;box-sizing:border-box}
+.editor-campo input[readonly] {background:#f1f4f8;color:#54657a;cursor:not-allowed}

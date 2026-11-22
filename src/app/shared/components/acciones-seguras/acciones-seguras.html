@@ -1,0 +1,44 @@
+<div class="gestiones">
+  <div class="gestiones-botones">
+    @if (mostrarVer) {
+      <button type="button" class="gestion-ver" (click)="ver()" title="Ver registro" aria-label="Ver registro"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+    }
+    @if (configuracion.permitirEditar && activo) {
+      <button type="button" class="gestion-editar" (click)="editar()" title="Editar registro" aria-label="Editar registro"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5 4 4M4 20l4.5-.9L20 7.6 16.4 4 4.9 15.5 4 20Z"/></svg></button>
+    }
+  </div>
+  @if (error()) { <p class="gestion-error" role="alert">{{ error() }}</p> }
+  @if (exito()) { <p class="gestion-ok" role="status">{{ exito() }}</p> }
+</div>
+<dialog #modal class="gestion-modal" (close)="editando.set(false)">
+  <div class="gestion-titulo">
+    <h3>{{ editando() ? 'Corregir registro' : 'Consultar registro' }} #{{ registro?.id }}</h3>
+    <button type="button" (click)="cerrar()" aria-label="Cerrar ventana">×</button>
+  </div>
+  @if (configuracion.aviso) { <p class="gestion-aviso">{{ configuracion.aviso }}</p> }
+  @for (campo of campos; track campo.key) {
+    @if (!editando() || (recurso !== 'personal' || campo.key !== 'perfil')) {
+      <label class="gestion-campo">
+        <span>{{ campo.label }}</span>
+        @if (editando()) {
+          @if (campo.largo) {
+            <textarea rows="3" [(ngModel)]="datos[campo.key]" [name]="campo.key"></textarea>
+          } @else {
+            <input [type]="campo.tipo || 'text'" [(ngModel)]="datos[campo.key]" [name]="campo.key" />
+          }
+        } @else {
+          <span class="gestion-valor">{{ registro?.[campo.key] ?? '—' }}</span>
+        }
+      </label>
+    }
+  }
+  @if (error()) { <p class="gestion-error" role="alert">{{ error() }}</p> }
+  <div class="gestion-final">
+    <button type="button" class="gestion-ver" (click)="cerrar()">Cerrar</button>
+    @if (editando()) {
+      <button type="button" class="gestion-editar" [disabled]="guardando()" (click)="guardar()">
+        {{ guardando() ? 'Guardando…' : 'Guardar corrección' }}
+      </button>
+    }
+  </div>
+</dialog>

@@ -1,0 +1,245 @@
+@if (enListado) {
+  <div class="page-title-row">
+    <h1>Programar orden de trabajo</h1>
+    <a class="action-primary" routerLink="/programaciones/nueva">＋ Nueva programación</a>
+  </div>
+  <section class="filters-card">
+    <div class="filter-large">
+      <label>Búsqueda rápida</label>
+      <div class="search-input">
+        <span>⌕</span>
+        <input
+          [(ngModel)]="buscar"
+          (keyup.enter)="buscarAhora()"
+          placeholder="Cliente, técnico, lugar o número de OT"
+        />
+      </div>
+    </div>
+    <div class="filter-small">
+      <label>Estado</label>
+      <select [(ngModel)]="filtro" (change)="buscarAhora()">
+        <option>Todos</option>
+        @for (e of estados; track e) {
+          <option>{{ e }}</option>
+        }
+      </select>
+    </div>
+    <button class="action-primary" (click)="buscarAhora()">Buscar</button>
+  </section>
+  <div class="list-card">
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>N° OT</th>
+            <th>CLIENTE</th>
+            <th>TÉCNICO</th>
+            <th>FECHA INICIO</th>
+            <th>ESTADO</th>
+            <th>ACCIONES</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (o of paginados; track o.id) {
+            <tr>
+              <td class="table-code">OT-{{ o.id }}</td>
+              <td>{{ o.solicitud?.cliente?.razonSocial }}</td>
+              <td>{{ o.tecnico?.nombre }}</td>
+              <td>{{ o.inicio || 'Sin programar' }}</td>
+              <td>
+                <span [class]="'status-chip ' + claseEstado(o.estado)">{{ o.estado }}</span>
+              </td>
+              <td>
+                <div class="row-actions">
+                  <a
+                    [routerLink]="['/programaciones/ver', o.id]"
+                    title="Ver programación"
+                    aria-label="Ver programación"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </a>
+                  <a
+                    [routerLink]="['/programaciones/editar', o.id]"
+                    title="Programar o reprogramar"
+                    aria-label="Programar"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5 4 4M4 20l4.5-.9L20 7.6 16.4 4 4.9 15.5 4 20Z"/></svg>
+                  </a>
+
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="empty-row">No se encontraron órdenes de trabajo.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <div class="table-footer">
+      <span>Mostrando {{ paginados.length }} de {{ filtrados.length }} órdenes</span>
+      <div class="pagination">
+        <button [disabled]="pagina === 1" (click)="irPagina(pagina - 1)">‹</button>
+        @for (n of paginas; track n) {
+          <button [class.current]="n === pagina" (click)="irPagina(n)">{{ n }}</button>
+        }
+        <button [disabled]="pagina === numeroPaginas" (click)="irPagina(pagina + 1)">›</button>
+      </div>
+    </div>
+  </div>
+  @if (error()) {
+    <div class="alert error">{{ error() }}</div>
+  }
+} @else if (esDetalle) {
+  <div class="form-page">
+    <div class="detail-head">
+      <h1>Programación OT-{{ registro?.id }}</h1>
+      <a class="action-secondary" routerLink="/programaciones">Volver</a>
+    </div>
+    @if (registro) {
+      <div class="detail-grid">
+        <div>
+          <label>Cliente</label>
+          <strong>{{ registro.solicitud?.cliente?.razonSocial }}</strong>
+        </div>
+        <div>
+          <label>Técnico</label>
+          <strong>{{ registro.tecnico?.nombre }}</strong>
+        </div>
+        <div>
+          <label>SSOMA</label>
+          <strong>{{ registro.ssoma?.nombre }}</strong>
+        </div>
+        <div>
+          <label>Lugar</label>
+          <strong>{{ registro.lugar || 'Sin programar' }}</strong>
+        </div>
+        <div>
+          <label>Inicio</label>
+          <strong>{{ registro.inicio || 'Pendiente' }}</strong>
+        </div>
+        <div>
+          <label>Fin</label>
+          <strong>{{ registro.fin || 'Pendiente' }}</strong>
+        </div>
+        <div>
+          <label>PT / IPER</label>
+          <strong
+            >{{ registro.nombrePt || 'Pendiente' }} /
+            {{ registro.nombreIper || 'Pendiente' }}</strong
+          >
+        </div>
+        <div>
+          <label>Aprobación del cliente</label>
+          <strong>{{ registro.aprobadoCliente ? 'Registrada' : 'Pendiente' }}</strong>
+        </div>
+      </div>
+      <div class="detail-actions">
+        <a class="action-primary" [routerLink]="['/programaciones/editar', registro.id]">
+          {{ registro.inicio ? 'Reprogramar' : 'Programar OT' }}
+        </a>
+        @if (registro.nombrePt) {
+          <button class="action-secondary" (click)="descargar(registro, 'pt')">Descargar PT</button>
+        }
+        @if (registro.nombreIper) {
+          <button class="action-secondary" (click)="descargar(registro, 'iper')">
+            Descargar IPER
+          </button>
+        }
+      </div>
+    } @else {
+      <p>Orden no encontrada.</p>
+    }
+  </div>
+} @else {
+  <div class="form-page">
+    <h1>
+      {{
+        esEdicion ? 'Programar / reprogramar orden de trabajo' : 'Nueva programación del servicio'
+      }}
+    </h1>
+    <section class="form-section">
+      <h2>Orden y documentación</h2>
+      <div class="form-grid">
+        <div class="full">
+          <label>ORDEN DE TRABAJO *</label>
+          <select [ngModel]="idOrden" (ngModelChange)="elegirPorId($event)" [disabled]="esEdicion">
+            <option [ngValue]="null">Seleccione una OT</option>
+            @for (o of pendientes; track o.id) {
+              <option [ngValue]="o.id">
+                OT-{{ o.id }} · {{ o.solicitud?.cliente?.razonSocial }}
+              </option>
+            }
+            @if (esEdicion) {
+              <option [ngValue]="idOrden">OT-{{ idOrden }}</option>
+            }
+          </select>
+        </div>
+        <div>
+          <label>PROCEDIMIENTO DE TRABAJO - PT (PDF) *</label>
+          <input type="file" accept=".pdf,application/pdf" (change)="archivo($event, 'pt')" />
+          <app-documento-adjunto [archivo]="archivos.pt" [permitirQuitar]="true" (quitar)="archivos.pt=null" />
+        </div>
+        <div>
+          <label>IPER (PDF) *</label>
+          <input type="file" accept=".pdf,application/pdf" (change)="archivo($event, 'iper')" />
+          <app-documento-adjunto [archivo]="archivos.iper" [permitirQuitar]="true" (quitar)="archivos.iper=null" />
+        </div>
+        <div>
+          <label>FECHA DE ENVÍO AL CLIENTE *</label>
+          <input type="date" [(ngModel)]="form.fechaEnvio" />
+        </div>
+        <div>
+          <label>CROQUIS (PDF, JPG O PNG)</label>
+          <input type="file" accept=".pdf,.jpg,.jpeg,.png" (change)="archivo($event, 'croquis')" />
+          <app-documento-adjunto [archivo]="archivos.croquis" [permitirQuitar]="true" (quitar)="archivos.croquis=null" />
+        </div>
+        <div class="full">
+          <label class="check">
+            <input type="checkbox" [(ngModel)]="form.aprobadoCliente" />
+            El cliente aprobó el PT e IPER *
+          </label>
+        </div>
+      </div>
+      @if (actual) {
+        <div class="detail-note">
+          {{ actual.solicitud?.tipoServicio?.nombre }} · Técnico: {{ actual.tecnico?.nombre }} ·
+          SSOMA: {{ actual.ssoma?.nombre }}.
+        </div>
+      }
+    </section>
+    <section class="form-section">
+      <h2>Programación del servicio</h2>
+      <div class="form-grid">
+        <div>
+          <label>INICIO *</label>
+          <input type="datetime-local" [(ngModel)]="form.inicio" />
+        </div>
+        <div>
+          <label>FIN *</label>
+          <input type="datetime-local" [(ngModel)]="form.fin" />
+        </div>
+        <div class="full">
+          <label>LUGAR DEL SERVICIO *</label>
+          <input [(ngModel)]="form.lugar" placeholder="Dirección o ubicación de trabajo" />
+        </div>
+        @if (esEdicion && actual?.inicio) {
+          <div class="full">
+            <label>MOTIVO DE REPROGRAMACIÓN *</label>
+            <textarea [(ngModel)]="form.motivoCambio" rows="3"></textarea>
+          </div>
+        }
+      </div>
+    </section>
+    @if (error()) {
+      <div class="alert error">{{ error() }}</div>
+    }
+    <div class="form-actions">
+      <a class="action-secondary" routerLink="/programaciones">Cancelar</a>
+      <button [disabled]="guardando()" class="action-primary" (click)="guardar()">
+        Guardar programación
+      </button>
+    </div>
+  </div>
+}

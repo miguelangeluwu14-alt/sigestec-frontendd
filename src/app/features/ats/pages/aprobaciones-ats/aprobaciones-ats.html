@@ -1,0 +1,196 @@
+@if (enListado) {
+  <div class="page-title-row">
+    <h1>Aprobación del ATS</h1>
+    <a class="action-primary" routerLink="/ats/aprobaciones/nueva">＋ Registrar aprobación</a>
+  </div>
+  <section class="filters-card">
+    <div class="filter-large">
+      <label>Búsqueda rápida</label>
+      <div class="search-input">
+        <span>⌕</span>
+        <input
+          [(ngModel)]="buscar"
+          (input)="buscarAhora()"
+          placeholder="N.º ATS, representante, resultado"
+        />
+      </div>
+    </div>
+  </section>
+  <section class="list-card">
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ATS</th>
+            <th>SUPERVISOR CLIENTE</th>
+            <th>SSOMA CLIENTE</th>
+            <th>FECHA</th>
+            <th>RESULTADO</th>
+            <th>ACTA</th><th>ACCIONES</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (a of paginados; track a.id) {
+            <tr>
+              <td class="table-code">ATS-{{ a.atsId }}</td>
+              <td>{{ a.supervisorCliente }}</td>
+              <td>{{ a.ssomaCliente }}</td>
+              <td>{{ a.fechaRevision }}</td>
+              <td>
+                <span [class]="'status-chip ' + claseEstado(a.resultado)">{{ a.resultado }}</span>
+              </td>
+              <td>
+                @if (a.urlActa) {
+                  <button class="outlined-link" (click)="descargar(a)">Descargar</button>
+                } @else {
+                  —
+                }
+              </td>
+              <td><app-acciones-seguras recurso="aprobaciones-ats" [registro]="a" (actualizado)="actualizarListado('/ats/aprobaciones')" /></td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="7" class="empty-row">No existen aprobaciones registradas.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <div class="table-footer">
+      <span>{{ filtrados.length }} aprobaciones</span>
+      <div class="pagination">
+        <button [disabled]="pagina === 1" (click)="irPagina(pagina - 1)">‹</button>
+        @for (n of paginas; track n) {
+          <button [class.current]="n === pagina" (click)="irPagina(n)">{{ n }}</button>
+        }
+      </div>
+    </div>
+  </section>
+  <section class="form-section" style="margin-top: 22px">
+    <h2>ATS pendientes de aprobación</h2>
+    <div class="list-card">
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ATS</th>
+              <th>OT</th>
+              <th>CLIENTE</th>
+              <th>ESTADO</th>
+              <th>ACCIÓN</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (a of pendientes; track a.id) {
+              <tr>
+                <td>ATS-{{ a.id }}</td>
+                <td>OT-{{ a.ordenTrabajo?.id }}</td>
+                <td>{{ a.ordenTrabajo?.solicitud?.cliente?.razonSocial }}</td>
+                <td>{{ a.estado }}</td>
+                <td>
+                  <a class="outlined-link" [routerLink]="['/ats/aprobaciones/nueva', a.id]"
+                    >Evaluar</a
+                  >
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" class="empty-row">No hay ATS pendientes.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+  @if (error()) {
+    <p class="alert error">{{ error() }}</p>
+  }
+} @else {
+  <div class="form-page">
+    <div class="detail-head">
+      <h1>Registrar aprobación del ATS</h1>
+      <a class="action-secondary" routerLink="/ats/aprobaciones">Volver</a>
+    </div>
+    <section class="form-section">
+      <h2>Evaluación del análisis</h2>
+      <div class="form-grid">
+        <div class="full">
+          <label>ATS PENDIENTE *</label>
+          <select [(ngModel)]="form.atsId">
+            <option [ngValue]="null">Seleccione un ATS</option>
+            @for (a of pendientes; track a.id) {
+              <option [ngValue]="a.id">
+                ATS-{{ a.id }} · OT-{{ a.ordenTrabajo?.id }} ·
+                {{ a.ordenTrabajo?.solicitud?.cliente?.razonSocial }}
+              </option>
+            }
+          </select>
+        </div>
+        <div>
+          <label>SUPERVISOR DEL CLIENTE *</label>
+          <input
+            [(ngModel)]="form.supervisorCliente"
+            maxlength="300"
+            placeholder="Nombre del representante firmante"
+          />
+        </div>
+        <div>
+          <label>SSOMA DEL CLIENTE *</label>
+          <input
+            [(ngModel)]="form.ssomaCliente"
+            maxlength="300"
+            placeholder="Nombre del responsable SSOMA"
+          />
+        </div>
+        <div>
+          <label>FECHA DE REVISIÓN *</label>
+          <input type="date" [(ngModel)]="form.fechaRevision" />
+        </div>
+        <div>
+          <label>RESULTADO *</label>
+          <select [(ngModel)]="form.resultado">
+            <option value="APROBADO">APROBADO</option>
+            <option value="RECHAZADO">RECHAZADO</option>
+          </select>
+        </div>
+        <div class="full">
+          <label>OBSERVACIONES {{ form.resultado === 'RECHAZADO' ? '*' : '' }}</label>
+          <textarea
+            rows="3"
+            [(ngModel)]="form.observaciones"
+            placeholder="Motivo del rechazo u observaciones de la revisión"
+          ></textarea>
+        </div>
+        <div class="full">
+          <label
+            >ACTA DE APROBACIÓN O CONSTANCIA {{ form.resultado === 'APROBADO' ? '*' : '' }} (PDF,
+            PNG o JPG)</label
+          >
+          <input
+            type="file"
+            accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/*"
+            (change)="archivo($event)"
+          />
+          <app-documento-adjunto [archivo]="acta" [permitirQuitar]="true" (quitar)="acta=null" />
+        </div>
+      </div>
+      @if (actual) {
+        <p class="detail-note">
+          OT-{{ actual.ordenTrabajo?.id }} · Cliente:
+          {{ actual.ordenTrabajo?.solicitud?.cliente?.razonSocial }} · Estado actual:
+          {{ actual.estado }}
+        </p>
+      }
+    </section>
+    @if (error()) {
+      <p class="alert error" role="alert">{{ error() }}</p>
+    }
+    <div class="form-actions">
+      <a class="action-secondary" routerLink="/ats/aprobaciones">Cancelar</a>
+      <button class="action-primary" [disabled]="guardando()" (click)="guardar()">
+        Guardar aprobación
+      </button>
+    </div>
+  </div>
+}

@@ -1,0 +1,262 @@
+.page-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 34px;
+}
+
+.page-title-row h1 {
+  margin: 0;
+}
+
+.action-primary,
+.action-secondary,
+.action-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border: 1px solid transparent;
+  min-height: 46px;
+  padding: 12px 20px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.action-primary {
+  color: #fff;
+  background: #006773;
+}
+
+.action-primary:hover {
+  background: #005560;
+  color: #fff;
+}
+
+.action-primary:disabled {
+  opacity: .55;
+}
+
+.action-secondary {
+  background: #606976;
+  color: #fff;
+}
+
+.action-secondary:hover {
+  background: #505c68;
+  color: #fff;
+}
+
+.action-danger {
+  border-color: #efc2c2;
+  background: #fff7f7;
+  color: #a02c2c;
+}
+
+.filters-card {
+  border: 1px solid #e4e9eb;
+  border-radius: 7px;
+  padding: 20px;
+  display: flex;
+  align-items: flex-end;
+  gap: 15px;
+  margin-bottom: 30px;
+  background: white;
+}
+
+.filters-card label {
+  font-size: 13px;
+  display: block;
+  margin-bottom: 10px;
+  color: #3e474d;
+}
+
+.filter-large {
+  flex: 2;
+  min-width: 0;
+}
+
+.filter-small {
+  flex: 1;
+  min-width: 155px;
+}
+
+.filters-card input,
+.filters-card select {
+  height: 46px;
+  border: 1px solid #c7d0d4;
+  border-radius: 4px;
+  padding: 0 13px;
+  background: white;
+  color: #27353b;
+  width: 100%;
+  min-width: 0;
+}
+
+.search-input {
+  position: relative;
+}
+
+.search-input span {
+  position: absolute;
+  left: 13px;
+  top: 7px;
+  font-size: 23px;
+  color: #839398;
+}
+
+.search-input input {
+  padding-left: 42px;
+}
+
+.list-card {
+  border: 1px solid #e6e9ec;
+  border-radius: 7px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.data-table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 750px;
+  font-size: 13px;
+  text-align: left;
+}
+
+.data-table th {
+  padding: 19px 17px;
+  background: #f2f3f5;
+  color: #454d52;
+  font-weight: 700;
+  letter-spacing: .025em;
+  text-transform: uppercase;
+  line-height: 1.5;
+  border-bottom: 1px solid #d6dade;
+}
+
+.data-table td {
+  padding: 19px 17px;
+  border-bottom: 1px solid #e8ebed;
+  color: #273439;
+  vertical-align: middle;
+  line-height: 1.65;
+}
+
+.data-table tr:hover td {
+  background: #fafcfc;
+}
+
+.data-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.table-code {
+  font-weight: 600;
+  color: #005d69 !important;
+}
+
+.status-chip {
+  display: inline-block;
+  padding: 5px 11px;
+  border-radius: 30px;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.estado-pendiente {
+  background: #fff7c8;
+  color: #846000;
+}
+
+.estado-exito {
+  background: #ddf7e8;
+  color: #137144;
+}
+
+.estado-info {
+  background: #e1f0f8;
+  color: #12677a;
+}
+
+.estado-error {
+  background: #fde3e5;
+  color: #ad3030;
+}
+
+.estado-neutral {
+  background: #edf1f3;
+  color: #54636c;
+}
+
+.row-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+}
+
+.row-actions a,
+.row-actions button {
+  background: transparent;
+  border: 0;
+  padding: 3px 2px;
+  color: #085867;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.row-actions button:disabled {
+  opacity: .28;
+}
+
+.row-actions a:hover {
+  color: #0bb4b3;
+}
+
+.empty-row {
+  text-align: center;
+  color: #7b8a90 !important;
+  padding: 36px !important;
+}
+
+.table-footer {
+  padding: 17px 19px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid #e4e7e9;
+  font-size: 12px;
+  color: #56636a;
+}
+
+.pagination {
+  display: flex;
+  gap: 5px;
+}
+
+.pagination button {
+  width: 34px;
+  height: 37px;
+  background: #fff;
+  border: 1px solid #cbd2d5;
+  color: #343e43;
+  font-size: 12px;
+}
+
+.pagination button.current {
+  background: #005d69;
+  color: white;
+  border-color: #005d69;
+}

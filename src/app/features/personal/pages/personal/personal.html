@@ -1,0 +1,78 @@
+<div class="page-heading">
+  <h1>Personal de servicios</h1>
+</div>
+<div class="two-cols">
+  <section class="panel">
+    <div class="panel-heading">
+      <h2>Registrar personal</h2>
+    </div>
+    <label for="personal-dni">DNI</label>
+    <div class="input-group personal-dni">
+      <input id="personal-dni" name="dni" class="form-control" [(ngModel)]="form.dni"
+             (ngModelChange)="alCambiarDni()" inputmode="numeric" maxlength="8"
+             autocomplete="off" placeholder="8 dígitos" [disabled]="guardando || consultandoDni" />
+      <button type="button" class="btn btn-outline-primary" (click)="consultarDni()"
+              [disabled]="consultandoDni || guardando || !form.dni.match('^[0-9]{8}$')">
+        {{ consultandoDni ? 'Consultando...' : 'Consultar DNI' }}
+      </button>
+    </div>
+    <p class="form-hint">Consulta opcional. Puedes escribir los datos manualmente si el servicio no está disponible.</p>
+    @if (errorConsulta) {
+      <div class="alert error" role="alert">{{ errorConsulta }}</div>
+    }
+    @if (avisoConsulta) {
+      <div class="alert ok" role="status">{{ avisoConsulta }}</div>
+    }
+    <label for="personal-nombres">Nombres *</label>
+    <input id="personal-nombres" name="nombres" [(ngModel)]="form.nombres" maxlength="100"
+           autocomplete="off" placeholder="Nombres del colaborador" [disabled]="guardando" />
+    <label for="personal-apellidos">Apellidos *</label>
+    <input id="personal-apellidos" name="apellidos" [(ngModel)]="form.apellidos" maxlength="120"
+           autocomplete="off" placeholder="Apellidos del colaborador" [disabled]="guardando" />
+    <label for="personal-perfil">Perfil *</label>
+    <select id="personal-perfil" name="perfil" [(ngModel)]="form.perfil" [disabled]="guardando">
+      <option value="TECNICO">Técnico</option>
+      <option value="SSOMA">SSOMA</option>
+      <option value="APOYO">Personal de apoyo</option>
+    </select>
+    <button type="button" class="btn primary" (click)="guardar()" [disabled]="guardando || consultandoDni">
+      {{ guardando ? 'Registrando...' : 'Registrar personal' }}
+    </button>
+    @if (error) {
+      <div class="alert error" role="alert">{{ error }}</div>
+    }
+    @if (ok) {
+      <div class="alert ok" role="status">{{ ok }}</div>
+    }
+  </section>
+  <section class="panel">
+    <div class="panel-heading">
+      <h2>Colaboradores</h2>
+      <span class="counter">{{ items.length }}</span>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Perfil</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (p of items; track p.id) {
+          <tr>
+            <td>{{ p.nombre }}</td>
+            <td>{{ p.perfil }}</td>
+            <td>{{ p.activo ? 'Activo' : 'Inactivo' }}</td>
+            <td><app-acciones-seguras recurso="personal" [registro]="p" (actualizado)="cargar()" /></td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="4">No hay personal registrado.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </section>
+</div>

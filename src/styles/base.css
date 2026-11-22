@@ -1,0 +1,77 @@
+:root {
+  --petroleo: #006773;
+  --petroleo-dark: #00555e;
+  --petroleo-hover: #137c86;
+  --petroleo-active: #207e88;
+  --tinta: #202b30;
+  --gris: #59646b;
+  --gris-suave: #e9edf0;
+  --bordes: #d4dce0;
+  --fondo: #fff;
+  --teal: #006b76;
+  font-family: Inter, Arial, Helvetica, sans-serif;
+  color: var(--tinta);
+  font-synthesis: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: white;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: .5;
+}
+
+a {
+  text-decoration: none;
+  color: var(--petroleo);
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  font-size: 26px;
+  line-height: 1.35;
+  letter-spacing: -.02em;
+  font-weight: 700;
+  margin-bottom: 22px;
+}
+
+h2 {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 14px;
+}
+
+h3 {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+small {
+  font-size: 11px;
+}

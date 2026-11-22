@@ -1,0 +1,18 @@
+@if (disponible) {
+  <div class="documento-adjunto">
+    <div class="documento-barra">
+      <div class="documento-nombre"><span aria-hidden="true">📎</span> {{ titulo }}</div>
+      <button type="button" class="action-secondary" [disabled]="cargando" (click)="ver()">{{ vista ? 'Ocultar vista previa' : cargando ? 'Abriendo…' : 'Vista previa' }}</button>
+      <button type="button" class="action-secondary" (click)="abrir()">Abrir</button>
+      @if (permitirQuitar) { <button type="button" class="documento-quitar" (click)="quitar.emit()">Quitar</button> }
+    </div>
+    @if (error) { <p class="alert error" role="alert">{{ error }}</p> }
+    @if (vista) {
+      @if (vistaEsImagen) {
+        <img class="documento-vista documento-imagen" [src]="imagenUrl" alt="Vista previa de {{ titulo }}" />
+      } @else {
+        <iframe class="documento-vista" [src]="vista" title="Vista previa del documento" loading="lazy"></iframe>
+      }
+    }
+  </div>
+}

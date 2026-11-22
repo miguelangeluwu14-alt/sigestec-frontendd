@@ -1,0 +1,65 @@
+<div class="form-page editor-registro">
+  @if (config) {
+    <div class="detail-head">
+      <h1>Editar {{ config.titulo }} #{{ id }}</h1>
+      <a class="action-secondary" [routerLink]="config.ruta">Volver</a>
+    </div>
+    @if (cargando) { <p role="status">Cargando los datos del registro…</p> }
+    @if (registro) {
+      <section class="form-section">
+        <h2>Datos del registro</h2>
+        <p class="editor-aviso">Los campos con candado se conservan sin modificaciones. Se aplica la misma validación de permisos y estados del backend.</p>
+        @if (config.nota) { <p class="editor-aviso">{{ config.nota }}</p> }
+        @if (estado) { <p><strong>Estado:</strong> {{ estado }}</p> }
+        <div class="form-grid">
+          @for (campo of campos; track campo.key) {
+            <div [class.full]="campo.largo" class="editor-campo">
+              <label [for]="campo.key">{{ campo.label }} @if (campo.bloqueado) { 🔒 }</label>
+              @if (campo.bloqueado) {
+                <input [id]="campo.key" [value]="valor(campo)" readonly class="readonly-input" />
+              } @else if (campo.largo) {
+                <textarea [id]="campo.key" rows="4" [name]="campo.key" [(ngModel)]="datos[campo.key]" [disabled]="bloqueadoEstado"></textarea>
+              } @else {
+                <input [id]="campo.key" [type]="campo.numero ? 'number':'text'" [name]="campo.key" [(ngModel)]="datos[campo.key]" [disabled]="bloqueadoEstado" />
+              }
+            </div>
+          }
+        </div>
+      </section>
+      @if (config.pdf) {
+        <section class="form-section">
+          <h2>Documento adjunto</h2>
+          @if (urlAnterior && !quitarAnterior) {
+            <app-documento-adjunto [url]="urlAnterior" [permitirQuitar]="puedeQuitar && !bloqueadoEstado" (quitar)="quitarExistente()" />
+          }
+          @if (quitarAnterior) {
+            <p class="editor-aviso">Se desvinculará el documento anterior al confirmar el guardado.</p>
+            <button class="action-secondary" type="button" (click)="recuperarExistente()">Conservar documento anterior</button>
+          }
+          @if (!bloqueadoEstado) {
+            <label for="documento-reemplazo">{{ urlAnterior ? 'Reemplazar archivo' : 'Adjuntar documento' }} (PDF, máximo 8 MB)</label>
+            <input id="documento-reemplazo" type="file" accept=".pdf,application/pdf" (change)="elegir($event)" />
+            <app-documento-adjunto [archivo]="archivo" [permitirQuitar]="true" (quitar)="quitarArchivo()" />
+          }
+        </section>
+      }
+      @if (evidencia.length) {
+        <section class="form-section">
+          <h2>Evidencias conservadas</h2>
+          @for (ev of evidencia; track ev.id) {
+            <app-documento-adjunto [url]="ev.urlArchivo" [nombre]="ev.nombreArchivo || ev.etapa || 'Evidencia'" />
+          }
+          <p class="editor-aviso">Las fotografías que forman parte del historial técnico se conservan para auditoría.</p>
+        </section>
+      }
+      @if (bloqueadoEstado) { <p class="alert error">Este registro no admite cambios en su estado actual.</p> }
+      @if (error) { <p class="alert error" role="alert">{{ error }}</p> }
+      <div class="form-actions">
+        <a class="action-secondary" [routerLink]="config.ruta">Cancelar</a>
+        <button class="action-primary" type="button" [disabled]="bloqueadoEstado||guardando" (click)="guardar()">{{guardando ? 'Guardando…' : 'Guardar cambios'}}</button>
+      </div>
+    }
+  } @else {
+    <p class="alert error">El módulo solicitado no permite una corrección desde este formulario.</p>
+  }
+</div>

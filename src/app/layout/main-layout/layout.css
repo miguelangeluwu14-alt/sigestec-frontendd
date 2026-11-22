@@ -1,0 +1,22 @@
+
+
+
+.session-countdown {
+  color: #e8fdff;
+  font-size: 12px;
+  white-space: nowrap;
+  padding: 7px 10px;
+  border: 1px solid #a3d7da79;
+  border-radius: 6px;
+  font-variant-numeric: tabular-nums;
+}
+.session-countdown-urgent {
+  background: #ffe7bc;
+  color: #673b00;
+  border-color: #f5bd59;
+  font-weight: 700;
+}
+@media (max-width: 600px) {
+  .session-countdown { font-size: 10px; padding: 5px 6px; }
+  .header-user { gap: 7px; }
+}

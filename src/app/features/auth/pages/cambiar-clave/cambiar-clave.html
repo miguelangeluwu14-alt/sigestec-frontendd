@@ -1,0 +1,27 @@
+<section class="password-page">
+  <div class="password-card">
+    <h1>Cambiar contraseña</h1>
+    <p class="password-hint">Por seguridad, confirma tu contraseña actual y elige una nueva.
+      Al guardar, volverás a iniciar sesión.</p>
+    <form (ngSubmit)="guardar()">
+      <label for="clave-actual">Contraseña actual</label>
+      <input id="clave-actual" name="actual" [type]="mostrar ? 'text' : 'password'"
+        [(ngModel)]="actual" autocomplete="current-password" required />
+
+      <label for="clave-nueva">Nueva contraseña</label>
+      <input id="clave-nueva" name="nueva" [type]="mostrar ? 'text' : 'password'"
+        [(ngModel)]="nueva" autocomplete="new-password" minlength="8" required />
+
+      <label for="clave-confirmar">Confirmar nueva contraseña</label>
+      <input id="clave-confirmar" name="confirmar" [type]="mostrar ? 'text' : 'password'"
+        [(ngModel)]="confirmar" autocomplete="new-password" minlength="8" required />
+
+      <label class="password-toggle"><input type="checkbox" name="mostrar" [(ngModel)]="mostrar" />
+        Mostrar contraseñas</label>
+      @if (error()) { <p role="alert" class="password-error">{{error()}}</p> }
+      <button type="submit" class="password-submit" [disabled]="guardando()">
+        {{guardando() ? 'Guardando...' : 'Guardar nueva contraseña'}}
+      </button>
+    </form>
+  </div>
+</section>
