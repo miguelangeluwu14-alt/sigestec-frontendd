@@ -24,10 +24,6 @@ export class Compras extends PaginaBase implements OnInit {
   };
   pdf: File | null = null;
   quitarPdf = false;
-  extrayendoPdf = false;
-  avisoExtraccion = '';
-  vistaPreviaPdf = '';
-  propuestasPdf: DetalleCompra[] = [];
   detalles: DetalleCompra[] = [];
   ngOnInit() {
     this.cargarItems('/ordenes-compra');
@@ -52,10 +48,13 @@ export class Compras extends PaginaBase implements OnInit {
       });
   }
   override textoBusqueda(x: any) {
-    return `${x.id} ${x.numero} ${x.cotizacion?.solicitud?.cliente?.razonSocial}`;
+    return `${x.codigo || ''} ${x.numero} ${x.cotizacion?.numero || ''} ${x.cotizacion?.solicitud?.cliente?.razonSocial}`;
   }
   override estadoDe(x: any) {
     return x.cotizacion?.estado || '';
+  }
+  get registroActual() {
+    return this.items().find((x) => x.id === this.id);
   }
   get aceptadas() {
     return this.cotizaciones().filter(
@@ -76,30 +75,6 @@ export class Compras extends PaginaBase implements OnInit {
   }
   archivo(e: Event) {
     this.pdf = (e.target as HTMLInputElement).files?.item(0) || null;
-    this.leerPdf();
-  }
-  leerPdf() {
-    this.propuestasPdf = [];
-    this.avisoExtraccion = '';
-    this.vistaPreviaPdf = '';
-    if (!this.pdf) return;
-    const fd = new FormData();
-    fd.append('pdf', this.pdf);
-    this.extrayendoPdf = true;
-    this.api.post<{detalles: DetalleCompra[]; textoVistaPrevia: string; aviso: string}>('/documentos/extraer-detalles', fd).subscribe({
-      next: r => { this.extrayendoPdf = false; this.propuestasPdf = r.detalles || [];
-        this.vistaPreviaPdf = r.textoVistaPrevia || ''; this.avisoExtraccion = r.aviso; },
-      error: e => { this.extrayendoPdf = false; this.avisoExtraccion = this.api.mensaje(e); },
-    });
-  }
-  aplicarPdf() {
-    if (!this.propuestasPdf.length) return;
-    this.detalles = this.propuestasPdf.map(d => ({
-      descripcion: d.descripcion, cantidad: Number(d.cantidad),
-      precioUnitario: Number(d.precioUnitario), unidadMedida: d.unidadMedida || 'SERVICIO',
-    }));
-    this.propuestasPdf = [];
-    this.avisoExtraccion = 'Detalles cargados. Confirma la coincidencia con la cotización y el monto antes de guardar.';
   }
   guardar() {
     if (this.esEdicion) {
@@ -115,6 +90,10 @@ export class Compras extends PaginaBase implements OnInit {
       !(this.form.montoTotal > 0)
     ) {
       this.error.set('Completa los campos obligatorios de la orden de compra.');
+      return;
+    }
+    if (this.detalles.some(d => !d.descripcion.trim() || !(d.cantidad > 0) || d.precioUnitario < 0)) {
+      this.error.set('Revisa las descripciones, cantidades y precios de los detalles antes de registrar la orden.');
       return;
     }
     if (

@@ -1,0 +1,36 @@
+<div class="form-page">
+  <div class="detail-head">
+    <h1>{{ titulo }} #{{ id }}</h1>
+    <a class="action-secondary" [routerLink]="volver">Volver al listado</a>
+  </div>
+  @if (cargando()) {
+    <p class="detail-note" role="status">Cargando registro…</p>
+  } @else if (error()) {
+    <p class="alert error" role="alert">{{ error() }}</p>
+  } @else if (datos()) {
+    <p class="detail-note">{{ aviso }}</p>
+    <section class="form-section">
+      <h2>Información del registro</h2>
+      <div class="detail-grid">
+        @for (c of campos; track c.etiqueta) {
+          <div [class.full]="c.largo">
+            <label>{{ c.etiqueta }}</label>
+            <strong class="detalle-valor">{{ c.valor }}</strong>
+          </div>
+        }
+      </div>
+    </section>
+    @if (tipo === 'aprobacion') {
+      <section class="form-section">
+        <h2>Acta de aprobación o constancia</h2>
+        @if (datos()?.urlActa) {
+          <app-documento-adjunto [url]="datos()!.urlActa" />
+        } @else {
+          <p class="detail-note">Sin documento adjunto.</p>
+        }
+      </section>
+    }
+  } @else {
+    <p class="alert error" role="alert">No se encontró el registro solicitado.</p>
+  }
+</div>

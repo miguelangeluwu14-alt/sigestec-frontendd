@@ -12,10 +12,23 @@ import { AccionesSeguras } from '../../../../shared/components/acciones-seguras/
 })
 export class HerramientasAlmacen extends PaginaBase implements OnInit {
   movimientos = signal<any[]>([]);
+  paginaMovimientos = 1;
+  get numeroPaginasMovimientos(): number {
+    return Math.max(1, Math.ceil(this.movimientos().length / this.tamanoPagina));
+  }
+  get paginasMovimientos(): number[] {
+    return Array.from({ length: this.numeroPaginasMovimientos }, (_, i) => i + 1);
+  }
+  get movimientosPaginados(): any[] {
+    const paginaActual = Math.min(this.paginaMovimientos, this.numeroPaginasMovimientos);
+    return this.movimientos().slice((paginaActual - 1) * this.tamanoPagina, paginaActual * this.tamanoPagina);
+  }
+  irPaginaMovimientos(numero: number) {
+    this.paginaMovimientos = Math.min(this.numeroPaginasMovimientos, Math.max(1, numero));
+  }
   ordenes = signal<any[]>([]);
   empleados = signal<any[]>([]);
   nuevo = {
-    codigo: '',
     nombre: '',
     descripcion: '',
     cantidadInicial: 0,
@@ -34,7 +47,10 @@ export class HerramientasAlmacen extends PaginaBase implements OnInit {
     this.api
       .get<any[]>('/almacen/herramientas/movimientos')
       .subscribe({
-        next: (x) => this.movimientos.set(x),
+        next: (x) => {
+          this.movimientos.set(x);
+          this.paginaMovimientos = Math.min(this.paginaMovimientos, this.numeroPaginasMovimientos);
+        },
         error: (e) => this.error.set(this.api.mensaje(e)),
       });
     this.api.get<any[]>('/ordenes-trabajo').subscribe({ next: (x) => this.ordenes.set(x) });
@@ -57,8 +73,8 @@ export class HerramientasAlmacen extends PaginaBase implements OnInit {
   }
   guardarHerramienta() {
     this.error.set('');
-    if (!this.nuevo.codigo.trim() || !this.nuevo.nombre.trim() || this.nuevo.cantidadInicial < 0) {
-      this.error.set('Indica código, nombre y cantidad inicial válida.');
+    if (!this.nuevo.nombre.trim() || this.nuevo.cantidadInicial < 0) {
+      this.error.set('Indica nombre y cantidad inicial válida.');
       return;
     }
     this.protegidoCargando(

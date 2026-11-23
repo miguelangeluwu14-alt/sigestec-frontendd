@@ -13,7 +13,10 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       : req;
   return next(r).pipe(
     catchError((e: HttpErrorResponse) => {
-      if (e.status === 401 && !req.url.endsWith('/auth/login')) auth.salir();
+      // Un 401 con ruta /error corresponde a un ERROR dispatch del servidor,
+      // no necesariamente a un token inválido. No cerrar la sesión en ese caso.
+      const errorDispatch = e.error?.ruta === '/error';
+      if (e.status === 401 && !errorDispatch && !req.url.endsWith('/auth/login')) auth.salir();
       return throwError(() => e);
     }),
   );

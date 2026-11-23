@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { PaginaBase } from '../../../../shared/pages/pagina-base';
 import { AccionesSeguras } from '../../../../shared/components/acciones-seguras/acciones-seguras';
+import { desplazarDiaISO, fechaISO } from '../../../../core/utils/fechas-servicio';
 
 @Component({
   standalone: true,
@@ -16,7 +17,6 @@ export class Informes extends PaginaBase implements OnInit {
   ejecuciones = signal<any[]>([]);
   form = {
     ordenTrabajoId: null as number | null,
-    numeroInforme: '',
     diagnostico: '',
     trabajosRealizados: '',
     conclusiones: '',
@@ -32,7 +32,7 @@ export class Informes extends PaginaBase implements OnInit {
       next: lista=>{
         const x=lista.find(v=>v.id===this.id);
         if(!x){this.error.set('Informe no encontrado');return;}
-        this.form={ordenTrabajoId:x.ordenTrabajo?.id,numeroInforme:x.numeroInforme||'',
+        this.form={ordenTrabajoId:x.ordenTrabajo?.id,
           diagnostico:x.diagnostico||'',trabajosRealizados:x.trabajosRealizados||'',
           conclusiones:x.conclusiones||'',recomendaciones:x.recomendaciones||'',
           fechaEnvio:String(x.fechaEnvio||'')};
@@ -47,7 +47,7 @@ export class Informes extends PaginaBase implements OnInit {
       });
   }
   override textoBusqueda(x: any) {
-    return `${x.numeroInforme} ${x.ordenTrabajo?.id} ${x.ordenTrabajo?.solicitud?.cliente?.razonSocial} ${x.conclusiones}`;
+    return `${x.numeroInforme} ${x.ordenTrabajo?.numero || ''} ${x.ordenTrabajo?.solicitud?.cliente?.razonSocial} ${x.conclusiones}`;
   }
   get elegibles() {
     return this.ejecuciones().filter(
@@ -56,6 +56,18 @@ export class Informes extends PaginaBase implements OnInit {
   }
   get actual() {
     return this.ejecuciones().find((e) => e.ordenTrabajo?.id === this.form.ordenTrabajoId);
+  }
+  get fechaFinOT(): string {
+    return fechaISO(this.actual?.ordenTrabajo?.fin);
+  }
+  get fechaMinimaInforme(): string {
+    // El formulario almacena solo una fecha (sin hora): primer día posterior al fin de la OT.
+    return desplazarDiaISO(this.fechaFinOT, 1);
+  }
+  seleccionarOt(id: number | null) {
+    this.form.ordenTrabajoId = id;
+    this.form.fechaEnvio = '';
+    this.error.set('');
   }
   archivo(e: Event) {
     this.pdf = (e.target as HTMLInputElement).files?.item(0) || null;
@@ -90,6 +102,18 @@ export class Informes extends PaginaBase implements OnInit {
       this.error.set(
         'Selecciona la OT ejecutada y completa diagnóstico, trabajos, conclusiones y fecha de envío.',
       );
+      return;
+    }
+    if (!this.actual) {
+      this.error.set('Selecciona una OT con ejecución registrada.');
+      return;
+    }
+    if (!this.fechaMinimaInforme) {
+      this.error.set('La OT no tiene fecha de finalización programada.');
+      return;
+    }
+    if (this.form.fechaEnvio < this.fechaMinimaInforme) {
+      this.error.set(`La fecha de envío debe ser posterior a la finalización del trabajo (desde ${this.fechaMinimaInforme}).`);
       return;
     }
     const fd = new FormData();

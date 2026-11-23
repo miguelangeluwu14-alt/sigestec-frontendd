@@ -31,9 +31,9 @@ En **Personal de servicios**, introduce un DNI de ocho dígitos y pulsa **Consul
 
 Esta funcionalidad requiere `IDENTIDAD_API_TOKEN` o, si ya se usa el proveedor para RUC, `SUNAT_API_TOKEN`, configurada **solo en Spring Boot**. El DNI, si se consigna, se guarda en Oracle y se comprueba que no esté duplicado.
 
-## Leer PDF de cotizaciones y órdenes
+## Adjuntos PDF de cotizaciones y órdenes
 
-Al seleccionar un PDF, el backend analiza el texto y muestra ítems sugeridos. Al pulsar **Aplicar detalles** se copian al formulario para su revisión. La lectura no garantiza reconocer todas las tablas ni imágenes escaneadas; es necesario comprobar moneda, cantidad, precio, IGV y total antes de registrar.
+Los detalles de cotización se ingresan manualmente. En órdenes de compra se cargan desde la cotización aceptada y pueden revisarse o corregirse. Adjuntar un PDF **no modifica** los detalles del formulario; el archivo solo se conserva como documento.
 
 ## Adjuntos en Drive
 
@@ -50,3 +50,8 @@ Autenticación JWT y autorización por roles. El correo de recuperación usa un 
 Repositorio de backend: https://github.com/Pari820/SigestecBackend
 
 Proyecto académico de Ingeniería de Sistemas — SIGESTEC.
+
+
+## Numeracion de actas de conformidad
+
+El numero de acta ya no se ingresa manualmente. El backend asigna `ACTA-AAAA-001` al guardar, usando el año de la fecha de conformidad. El formulario muestra que el codigo se generara automaticamente.

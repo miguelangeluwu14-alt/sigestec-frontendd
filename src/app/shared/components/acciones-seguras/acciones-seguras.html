@@ -12,7 +12,7 @@
 </div>
 <dialog #modal class="gestion-modal" (close)="editando.set(false)">
   <div class="gestion-titulo">
-    <h3>{{ editando() ? 'Corregir registro' : 'Consultar registro' }} #{{ registro?.id }}</h3>
+    <h3>{{ editando() ? 'Corregir registro' : 'Consultar registro' }} {{ identificadorRegistro }}</h3>
     <button type="button" (click)="cerrar()" aria-label="Cerrar ventana">×</button>
   </div>
   @if (configuracion.aviso) { <p class="gestion-aviso">{{ configuracion.aviso }}</p> }

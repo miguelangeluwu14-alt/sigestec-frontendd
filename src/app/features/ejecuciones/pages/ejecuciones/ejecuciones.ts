@@ -53,7 +53,7 @@ export class Ejecuciones extends PaginaBase implements OnInit {
     this.api.get<any[]>('/almacen/materiales').subscribe({ next: (x) => this.materiales.set(x) });
   }
   override textoBusqueda(x: any) {
-    return `${x.id} ${x.ordenTrabajo?.id} ${x.ordenTrabajo?.solicitud?.cliente?.razonSocial} ${x.descripcion}`;
+    return `${x.numeroEjecucion || ''} ${x.ordenTrabajo?.numero || ''} ${x.ordenTrabajo?.solicitud?.cliente?.razonSocial} ${x.descripcion}`;
   }
   get elegibles() {
     return this.ordenes().filter(

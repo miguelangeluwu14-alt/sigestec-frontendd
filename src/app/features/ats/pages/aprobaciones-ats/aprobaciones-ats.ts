@@ -3,11 +3,11 @@ import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { PaginaBase } from '../../../../shared/pages/pagina-base';
-import { AccionesSeguras } from '../../../../shared/components/acciones-seguras/acciones-seguras';
+import { desplazarDiaISO, fechaISO } from '../../../../core/utils/fechas-servicio';
 
 @Component({
   standalone: true,
-  imports: [DocumentoAdjunto, FormsModule, RouterLink, AccionesSeguras],
+  imports: [DocumentoAdjunto, FormsModule, RouterLink],
   templateUrl: './aprobaciones-ats.html',
   styleUrl: './aprobaciones-ats.css',
 })
@@ -33,7 +33,7 @@ export class AprobacionesAts extends PaginaBase implements OnInit {
     });
   }
   override textoBusqueda(x: any) {
-    return `${x.atsId} ${x.supervisorCliente} ${x.ssomaCliente} ${x.resultado}`;
+    return `${x.atsNumero || ''} ${x.supervisorCliente} ${x.ssomaCliente} ${x.resultado}`;
   }
   get pendientes() {
     return this.ats().filter(
@@ -44,6 +44,33 @@ export class AprobacionesAts extends PaginaBase implements OnInit {
   }
   get actual() {
     return this.ats().find((a) => a.id === this.form.atsId);
+  }
+
+  // El ATS expone fechaElaboracion y la OT expone inicio (YYYY-MM-DDTHH:mm:ss).
+  get fechaRevisionMinima(): string {
+    return fechaISO(this.actual?.fechaElaboracion);
+  }
+
+  get fechaInicioOT(): string {
+    return fechaISO(this.actual?.ordenTrabajo?.inicio);
+  }
+
+  get fechaRevisionMaxima(): string {
+    // La aprobación debe ser ANTERIOR al día de inicio de la OT.
+    // No limitar a "hoy": permite programar una revisión en el intervalo válido.
+    return desplazarDiaISO(this.fechaInicioOT, -1);
+  }
+
+  get rangoRevisionInvalido(): boolean {
+    const minimo = this.fechaRevisionMinima;
+    const maximo = this.fechaRevisionMaxima;
+    return !!minimo && !!maximo && minimo > maximo;
+  }
+
+  seleccionarAts(id: number | null) {
+    this.form.atsId = id;
+    this.form.fechaRevision = '';
+    this.error.set('');
   }
   archivo(e: Event) {
     this.acta = (e.target as HTMLInputElement).files?.item(0) || null;
@@ -61,6 +88,29 @@ export class AprobacionesAts extends PaginaBase implements OnInit {
       !this.form.fechaRevision
     ) {
       this.error.set('Indica el ATS, los representantes del cliente y la fecha de revisión.');
+      return;
+    }
+    const minimo = this.fechaRevisionMinima;
+    const inicioOT = this.fechaInicioOT;
+    const maximo = this.fechaRevisionMaxima;
+    if (!minimo) {
+      this.error.set('No se pudo determinar la fecha de registro del ATS seleccionado.');
+      return;
+    }
+    if (!inicioOT) {
+      this.error.set('La orden de trabajo no tiene una fecha de inicio programada.');
+      return;
+    }
+    if (this.rangoRevisionInvalido) {
+      this.error.set('No existe una fecha válida: el ATS se registró el día de inicio de la OT o después.');
+      return;
+    }
+    if (this.form.fechaRevision < minimo) {
+      this.error.set(`La revisión no puede ser anterior al registro del ATS (${minimo}).`);
+      return;
+    }
+    if (this.form.fechaRevision > maximo) {
+      this.error.set(`La revisión debe realizarse antes del inicio de la OT (${inicioOT}); última fecha válida: ${maximo}.`);
       return;
     }
     if (this.form.resultado === 'APROBADO' && !this.acta) {

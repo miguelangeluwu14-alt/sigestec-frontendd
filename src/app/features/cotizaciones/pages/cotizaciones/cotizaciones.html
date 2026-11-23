@@ -48,7 +48,7 @@
         <tbody>
           @for (c of paginados; track c.id) {
             <tr>
-              <td class="table-code">COT-{{ c.id }}</td>
+              <td class="table-code">{{ c.numero }}</td>
               <td>{{ c.solicitud?.cliente?.razonSocial }}</td>
               <td>S/ {{ c.monto }}</td>
               <td>{{ c.fecha }}</td>
@@ -101,7 +101,7 @@
 } @else if (esDetalle) {
   <div class="form-page">
     <div class="detail-head">
-      <h1>Cotización N° {{ registro?.id }}</h1>
+      <h1>Cotización {{ registro?.numero }}</h1>
       <a routerLink="/cotizaciones" class="action-secondary">Volver</a>
     </div>
     @if (registro) {
@@ -113,7 +113,7 @@
         </div>
         <div>
           <label>Solicitud</label>
-          <strong>#{{ registro.solicitud?.id }}</strong>
+          <strong>{{ registro.solicitud?.codigo }}</strong>
         </div>
         <div>
           <label>Monto</label>
@@ -196,10 +196,10 @@
           <select [(ngModel)]="form.solicitudId" [disabled]="esEdicion">
             <option [ngValue]="null">Seleccione una solicitud</option>
             @for (s of pendientes; track s.id) {
-              <option [ngValue]="s.id">Solicitud #{{ s.id }} · {{ s.cliente?.razonSocial }}</option>
+              <option [ngValue]="s.id">{{ s.codigo }} · {{ s.cliente?.razonSocial }}</option>
             }
             @if (esEdicion) {
-              <option [ngValue]="form.solicitudId">Solicitud #{{ form.solicitudId }}</option>
+              <option [ngValue]="form.solicitudId">{{ solicitada?.codigo || form.solicitudId }}</option>
             }
           </select>
         </div>
@@ -243,10 +243,6 @@
                 <input type="number" min="0" step="0.01" [(ngModel)]="d.precioUnitario" />
               </div>
               <div>
-                <label>UNIDAD DE MEDIDA</label>
-                <input [(ngModel)]="d.unidadMedida" />
-              </div>
-              <div>
                 <label>IMPORTE</label>
                 <input
                   [value]="(d.cantidad * d.precioUnitario).toFixed(2)"
@@ -268,20 +264,6 @@
         @if (esEdicion && registro?.urlArchivo && !quitarPdf) { <app-documento-adjunto [url]="registro.urlArchivo" [permitirQuitar]="true" (quitar)="quitarPdf=true" /> }
         @if (quitarPdf) { <button type="button" class="action-secondary" (click)="quitarPdf=false">Conservar PDF anterior</button> }
         <app-documento-adjunto [archivo]="pdf" [permitirQuitar]="true" (quitar)="pdf = null" />
-        @if (extrayendoPdf) { <p class="form-hint" role="status">Analizando texto del PDF...</p> }
-        @if (avisoExtraccion) { <p class="form-hint" role="status">{{ avisoExtraccion }}</p> }
-        @if (propuestasPdf.length) {
-          <div class="preview-extraccion">
-            <strong>Detalles sugeridos ({{ propuestasPdf.length }})</strong>
-            @for (d of propuestasPdf; track $index) {
-              <p>{{ d.descripcion }} · {{ d.cantidad }} × S/ {{ d.precioUnitario }}</p>
-            }
-            <button type="button" class="action-secondary" (click)="aplicarPdf()">Aplicar detalles al formulario</button>
-          </div>
-        }
-        @if (vistaPreviaPdf && !propuestasPdf.length) {
-          <details class="preview-extraccion"><summary>Ver texto extraído</summary><pre>{{ vistaPreviaPdf }}</pre></details>
-        }
       </div>
       <div class="field-block">
         <label>OBSERVACIONES</label>

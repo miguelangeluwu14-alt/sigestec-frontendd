@@ -32,7 +32,7 @@
         <tbody>
           @for (a of paginados; track a.id) {
             <tr>
-              <td class="table-code">ATS-{{ a.atsId }}</td>
+              <td class="table-code">{{ a.atsNumero }}</td>
               <td>{{ a.supervisorCliente }}</td>
               <td>{{ a.ssomaCliente }}</td>
               <td>{{ a.fechaRevision }}</td>
@@ -46,7 +46,9 @@
                   —
                 }
               </td>
-              <td><app-acciones-seguras recurso="aprobaciones-ats" [registro]="a" (actualizado)="actualizarListado('/ats/aprobaciones')" /></td>
+              <td><div class="row-actions"><a [routerLink]="['/ats/aprobaciones/ver', a.id]" title="Ver aprobación" aria-label="Ver aprobación">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                </a></div></td>
             </tr>
           } @empty {
             <tr>
@@ -83,8 +85,8 @@
           <tbody>
             @for (a of pendientes; track a.id) {
               <tr>
-                <td>ATS-{{ a.id }}</td>
-                <td>OT-{{ a.ordenTrabajo?.id }}</td>
+                <td>{{ a.numero }}</td>
+                <td>{{ a.ordenTrabajo?.numero }}</td>
                 <td>{{ a.ordenTrabajo?.solicitud?.cliente?.razonSocial }}</td>
                 <td>{{ a.estado }}</td>
                 <td>
@@ -117,11 +119,11 @@
       <div class="form-grid">
         <div class="full">
           <label>ATS PENDIENTE *</label>
-          <select [(ngModel)]="form.atsId">
+          <select [ngModel]="form.atsId" (ngModelChange)="seleccionarAts($event)">
             <option [ngValue]="null">Seleccione un ATS</option>
             @for (a of pendientes; track a.id) {
               <option [ngValue]="a.id">
-                ATS-{{ a.id }} · OT-{{ a.ordenTrabajo?.id }} ·
+                {{ a.numero }} · {{ a.ordenTrabajo?.numero }} ·
                 {{ a.ordenTrabajo?.solicitud?.cliente?.razonSocial }}
               </option>
             }
@@ -145,7 +147,24 @@
         </div>
         <div>
           <label>FECHA DE REVISIÓN *</label>
-          <input type="date" [(ngModel)]="form.fechaRevision" />
+          <input
+            type="date"
+            [(ngModel)]="form.fechaRevision"
+            [attr.min]="fechaRevisionMinima || null"
+            [attr.max]="fechaRevisionMaxima || null"
+            [disabled]="!actual || !fechaRevisionMinima || !fechaRevisionMaxima || rangoRevisionInvalido"
+          />
+          @if (actual && !rangoRevisionInvalido && fechaRevisionMinima && fechaRevisionMaxima) {
+            <p class="form-hint">
+              Desde el registro del ATS ({{ fechaRevisionMinima }}) hasta
+              {{ fechaRevisionMaxima }} (día anterior al inicio de la OT).
+            </p>
+          }
+          @if (actual && rangoRevisionInvalido) {
+            <p class="alert error" role="alert">
+              No se puede aprobar este ATS: se registró el día de inicio de la OT o después.
+            </p>
+          }
         </div>
         <div>
           <label>RESULTADO *</label>
@@ -177,7 +196,7 @@
       </div>
       @if (actual) {
         <p class="detail-note">
-          OT-{{ actual.ordenTrabajo?.id }} · Cliente:
+          {{ actual.ordenTrabajo?.numero }} · Cliente:
           {{ actual.ordenTrabajo?.solicitud?.cliente?.razonSocial }} · Estado actual:
           {{ actual.estado }}
         </p>

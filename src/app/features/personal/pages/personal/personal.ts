@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../../core/services/api.service';
+import { REGISTROS_POR_PAGINA } from '../../../../shared/pages/pagina-base';
 import { AccionesSeguras } from '../../../../shared/components/acciones-seguras/acciones-seguras';
 
 type PersonaDni = {
@@ -31,6 +32,22 @@ export class PersonalCatalogo implements OnInit {
   api = inject(ApiService);
   private cdr = inject(ChangeDetectorRef);
   items: any[] = [];
+  pagina = 1;
+  readonly tamanoPagina = REGISTROS_POR_PAGINA;
+
+  get numeroPaginas(): number {
+    return Math.max(1, Math.ceil(this.items.length / this.tamanoPagina));
+  }
+  get paginas(): number[] {
+    return Array.from({ length: this.numeroPaginas }, (_, i) => i + 1);
+  }
+  get paginados(): any[] {
+    const paginaActual = Math.min(this.pagina, this.numeroPaginas);
+    return this.items.slice((paginaActual - 1) * this.tamanoPagina, paginaActual * this.tamanoPagina);
+  }
+  irPagina(numero: number) {
+    this.pagina = Math.min(this.numeroPaginas, Math.max(1, numero));
+  }
   form: FormularioPersonal = formularioVacio();
   error = '';
   ok = '';
@@ -46,7 +63,7 @@ export class PersonalCatalogo implements OnInit {
 
   cargar() {
     this.api.get<any[]>('/personal').subscribe({
-      next: (r) => { this.items = r; this.cdr.markForCheck(); },
+      next: (r) => { this.items = r; this.pagina = Math.min(this.pagina, this.numeroPaginas); this.cdr.markForCheck(); },
       error: (e) => { this.error = this.api.mensaje(e); this.cdr.markForCheck(); },
     });
   }

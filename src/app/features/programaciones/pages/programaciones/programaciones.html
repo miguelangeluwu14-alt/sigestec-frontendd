@@ -42,7 +42,7 @@
         <tbody>
           @for (o of paginados; track o.id) {
             <tr>
-              <td class="table-code">OT-{{ o.id }}</td>
+              <td class="table-code">{{ o.numero }}</td>
               <td>{{ o.solicitud?.cliente?.razonSocial }}</td>
               <td>{{ o.tecnico?.nombre }}</td>
               <td>{{ o.inicio || 'Sin programar' }}</td>
@@ -94,7 +94,7 @@
 } @else if (esDetalle) {
   <div class="form-page">
     <div class="detail-head">
-      <h1>Programación OT-{{ registro?.id }}</h1>
+      <h1>Programación {{ registro?.numero }}</h1>
       <a class="action-secondary" routerLink="/programaciones">Volver</a>
     </div>
     @if (registro) {
@@ -168,11 +168,11 @@
             <option [ngValue]="null">Seleccione una OT</option>
             @for (o of pendientes; track o.id) {
               <option [ngValue]="o.id">
-                OT-{{ o.id }} · {{ o.solicitud?.cliente?.razonSocial }}
+                {{ o.numero }} · {{ o.solicitud?.cliente?.razonSocial }}
               </option>
             }
             @if (esEdicion) {
-              <option [ngValue]="idOrden">OT-{{ idOrden }}</option>
+              <option [ngValue]="idOrden">{{ actual?.numero || idOrden }}</option>
             }
           </select>
         </div>
@@ -214,11 +214,23 @@
       <div class="form-grid">
         <div>
           <label>INICIO *</label>
-          <input type="datetime-local" [(ngModel)]="form.inicio" />
+          <input
+            type="datetime-local"
+            [(ngModel)]="form.inicio"
+            [min]="minimoInicio"
+            (focus)="actualizarLimitesFechas()"
+            (click)="actualizarLimitesFechas()"
+          />
         </div>
         <div>
           <label>FIN *</label>
-          <input type="datetime-local" [(ngModel)]="form.fin" />
+          <input
+            type="datetime-local"
+            [(ngModel)]="form.fin"
+            [min]="minimoFin"
+            (focus)="actualizarLimitesFechas()"
+            (click)="actualizarLimitesFechas()"
+          />
         </div>
         <div class="full">
           <label>LUGAR DEL SERVICIO *</label>

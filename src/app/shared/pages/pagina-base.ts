@@ -2,6 +2,8 @@ import { inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ApiService } from '../../core/services/api.service';
 
+export const REGISTROS_POR_PAGINA = 10;
+
 export abstract class PaginaBase {
   readonly api = inject(ApiService);
   readonly router = inject(Router);
@@ -13,7 +15,7 @@ export abstract class PaginaBase {
   buscar = '';
   filtro = 'Todos';
   pagina = 1;
-  readonly tamanoPagina = 5;
+  readonly tamanoPagina = REGISTROS_POR_PAGINA;
   get vista(): string {
     return this.route.snapshot.data['vista'] || 'listado';
   }

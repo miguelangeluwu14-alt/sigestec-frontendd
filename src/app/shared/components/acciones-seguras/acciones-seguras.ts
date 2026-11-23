@@ -116,6 +116,14 @@ export class AccionesSeguras {
   @Output() actualizado = new EventEmitter<void>();
   @ViewChild('modal') modal!: ElementRef<HTMLDialogElement>;
 
+  get identificadorRegistro(): string | number {
+    const r = this.registro || {};
+    if (['clientes', 'tipos-servicio', 'personal'].includes(this.recurso) && r.numeroRegistro != null) {
+      return '#' + r.numeroRegistro;
+    }
+    return r.codigo || r.numero || r.numeroInforme || r.numeroEjecucion || r.atsNumero || r.numeroActa || r.id || '—';
+  }
+
   private readonly api = inject(ApiService);
   private readonly router = inject(Router);
   readonly error = signal('');

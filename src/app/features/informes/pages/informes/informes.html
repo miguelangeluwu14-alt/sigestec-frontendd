@@ -29,7 +29,7 @@
           @for (i of paginados; track i.id) {
             <tr>
               <td class="table-code">{{ i.numeroInforme }}</td>
-              <td>OT-{{ i.ordenTrabajo?.id }}</td>
+              <td>{{ i.ordenTrabajo?.numero }}</td>
               <td>{{ i.ordenTrabajo?.solicitud?.cliente?.razonSocial }}</td>
               <td>{{ i.fechaEnvio }}</td>
               <td>
@@ -75,7 +75,7 @@
       <div class="detail-grid">
         <div>
           <label>Orden de trabajo</label>
-          <strong>OT-{{ registro.ordenTrabajo?.id }}</strong>
+          <strong>{{ registro.ordenTrabajo?.numero }}</strong>
         </div>
         <div>
           <label>Fecha de envío</label>
@@ -128,23 +128,34 @@
       <div class="form-grid">
         <div class="full">
           <label>OT CON EJECUCIÓN REGISTRADA *</label>
-          <select [(ngModel)]="form.ordenTrabajoId" [disabled]="esEdicion">
-            @if (esEdicion) { <option [ngValue]="form.ordenTrabajoId">OT-{{ form.ordenTrabajoId }}</option> }
+          <select [ngModel]="form.ordenTrabajoId" (ngModelChange)="seleccionarOt($event)" [disabled]="esEdicion">
+            @if (esEdicion) { <option [ngValue]="form.ordenTrabajoId">{{ actual?.ordenTrabajo?.numero || form.ordenTrabajoId }}</option> }
             <option [ngValue]="null">Seleccione la OT</option>
             @for (e of elegibles; track e.id) {
               <option [ngValue]="e.ordenTrabajo?.id">
-                OT-{{ e.ordenTrabajo?.id }} · {{ e.ordenTrabajo?.solicitud?.cliente?.razonSocial }}
+                {{ e.ordenTrabajo?.numero }} · {{ e.ordenTrabajo?.solicitud?.cliente?.razonSocial }}
               </option>
             }
           </select>
         </div>
         <div>
-          <label>NÚMERO DE INFORME (opcional)</label>
-          <input [(ngModel)]="form.numeroInforme" placeholder="Automático si se deja vacío" [disabled]="esEdicion" />
+          <label>NÚMERO DE INFORME (AUTOMÁTICO)</label>
+          <p class="form-hint">El número de informe se asignará automáticamente al guardar.</p>
         </div>
         <div>
           <label>FECHA DE ENVÍO AL CLIENTE *</label>
-          <input type="date" [(ngModel)]="form.fechaEnvio" [disabled]="esEdicion" />
+          <input type="date" [(ngModel)]="form.fechaEnvio"
+            [attr.min]="fechaMinimaInforme || null"
+            [disabled]="esEdicion || !actual || !fechaMinimaInforme" />
+          @if (!esEdicion && actual && fechaMinimaInforme) {
+            <p class="form-hint">Elige una fecha posterior al fin del trabajo, desde {{ fechaMinimaInforme }}.</p>
+          }
+          @if (!esEdicion && form.fechaEnvio && fechaMinimaInforme && form.fechaEnvio < fechaMinimaInforme) {
+            <p class="form-hint" role="alert">La fecha elegida es anterior a la finalización del trabajo.</p>
+          }
+          @if (!esEdicion && actual && !fechaMinimaInforme) {
+            <p class="form-hint">La OT seleccionada no tiene una fecha de fin programada.</p>
+          }
         </div>
       </div>
       @if (actual) {

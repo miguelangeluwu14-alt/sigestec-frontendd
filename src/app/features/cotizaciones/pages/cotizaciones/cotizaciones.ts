@@ -7,7 +7,8 @@ type Linea = {
   descripcion: string;
   cantidad: number;
   precioUnitario: number;
-  unidadMedida: string;
+  // Campo interno conservado para compatibilidad con datos históricos; no aparece en el formulario.
+  unidadMedida?: string;
 };
 @Component({
   standalone: true,
@@ -19,10 +20,6 @@ export class Cotizaciones extends PaginaBase implements OnInit {
   solicitudes = signal<any[]>([]);
   pdf: File | null = null;
   quitarPdf = false;
-  extrayendoPdf = false;
-  avisoExtraccion = '';
-  vistaPreviaPdf = '';
-  propuestasPdf: Linea[] = [];
   form: {
     solicitudId: number | null;
     descripcionTrabajo: string;
@@ -71,7 +68,7 @@ export class Cotizaciones extends PaginaBase implements OnInit {
       });
   }
   override textoBusqueda(x: any) {
-    return `${x.id} ${x.solicitud?.cliente?.razonSocial || ''} ${x.descripcionTrabajo || ''}`;
+    return `${x.numero || ''} ${x.id} ${x.solicitud?.cliente?.razonSocial || ''} ${x.descripcionTrabajo || ''}`;
   }
   get pendientes() {
     return this.solicitudes().filter((s) => ['PENDIENTE', 'COTIZADA'].includes(s.estado));
@@ -94,34 +91,6 @@ export class Cotizaciones extends PaginaBase implements OnInit {
   archivo(e: Event) {
     this.pdf = (e.target as HTMLInputElement).files?.item(0) || null;
     if(this.pdf)this.quitarPdf=false;
-    this.leerPdf();
-  }
-  leerPdf() {
-    this.propuestasPdf = [];
-    this.vistaPreviaPdf = '';
-    this.avisoExtraccion = '';
-    if (!this.pdf) return;
-    const fd = new FormData();
-    fd.append('pdf', this.pdf);
-    this.extrayendoPdf = true;
-    this.api.post<{detalles: Linea[]; textoVistaPrevia: string; aviso: string}>('/documentos/extraer-detalles', fd).subscribe({
-      next: r => {
-        this.extrayendoPdf = false;
-        this.propuestasPdf = r.detalles || [];
-        this.vistaPreviaPdf = r.textoVistaPrevia || '';
-        this.avisoExtraccion = r.aviso;
-      },
-      error: e => { this.extrayendoPdf = false; this.avisoExtraccion = this.api.mensaje(e); },
-    });
-  }
-  aplicarPdf() {
-    if (!this.propuestasPdf.length) return;
-    this.form.detalles = this.propuestasPdf.map(d => ({
-      descripcion: d.descripcion, cantidad: Number(d.cantidad),
-      precioUnitario: Number(d.precioUnitario), unidadMedida: d.unidadMedida || 'SERVICIO',
-    }));
-    this.propuestasPdf = [];
-    this.avisoExtraccion = 'Detalles agregados al formulario. Revisa los importes antes de guardar.';
   }
   agregarDetalle() {
     this.form.detalles.push({

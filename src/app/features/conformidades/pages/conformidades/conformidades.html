@@ -33,7 +33,7 @@
           @for (c of paginados; track c.id) {
             <tr>
               <td class="table-code">{{ c.numeroActa }}</td>
-              <td>OT-{{ c.ordenTrabajo?.id }}</td>
+              <td>{{ c.ordenTrabajo?.numero }}</td>
               <td>{{ c.ordenTrabajo?.solicitud?.cliente?.razonSocial }}</td>
               <td>{{ c.fechaConformidad }}</td>
               <td>
@@ -80,7 +80,7 @@
       <div class="detail-grid">
         <div>
           <label>OT</label>
-          <strong>OT-{{ registro.ordenTrabajo?.id }}</strong>
+          <strong>{{ registro.ordenTrabajo?.numero }}</strong>
         </div>
         <div>
           <label>Fecha</label>
@@ -120,22 +120,28 @@
       <div class="form-grid">
         <div class="full">
           <label>OT CON INFORME ENVIADO *</label>
-          <select [(ngModel)]="form.ordenTrabajoId">
+          <select [ngModel]="form.ordenTrabajoId" (ngModelChange)="seleccionarOt($event)">
             <option [ngValue]="null">Seleccione una OT</option>
             @for (i of elegibles; track i.id) {
               <option [ngValue]="i.ordenTrabajo?.id">
-                OT-{{ i.ordenTrabajo?.id }} · {{ i.ordenTrabajo?.solicitud?.cliente?.razonSocial }}
+                {{ i.ordenTrabajo?.numero }} · {{ i.ordenTrabajo?.solicitud?.cliente?.razonSocial }}
               </option>
             }
           </select>
         </div>
         <div>
-          <label>NÚMERO DE ACTA *</label>
-          <input [(ngModel)]="form.numeroActa" maxlength="50" />
+          <label>NÚMERO DE ACTA (AUTOMÁTICO)</label>
+          <input value="Se asignará automáticamente al guardar" readonly />
+          <p class="form-hint">Formato: ACTA-AAAA-001. La numeración se genera en orden según el año de la fecha de conformidad.</p>
         </div>
         <div>
           <label>FECHA DE CONFORMIDAD *</label>
-          <input type="date" [(ngModel)]="form.fechaConformidad" />
+          <input type="date" [(ngModel)]="form.fechaConformidad"
+            [attr.min]="fechaMinimaConformidad || null"
+            [disabled]="!actual || !fechaMinimaConformidad" />
+          @if (actual && fechaMinimaConformidad) {
+            <p class="form-hint">Desde la fecha de envío del informe ({{ fechaMinimaConformidad }}) en adelante. Se permiten fechas simuladas futuras.</p>
+          }
         </div>
         <div class="full">
           <label>REPRESENTANTE DEL CLIENTE QUE FIRMA *</label>

@@ -12,9 +12,22 @@ import { AccionesSeguras } from '../../../../shared/components/acciones-seguras/
 })
 export class MaterialesAlmacen extends PaginaBase implements OnInit {
   movimientos = signal<any[]>([]);
+  paginaMovimientos = 1;
+  get numeroPaginasMovimientos(): number {
+    return Math.max(1, Math.ceil(this.movimientos().length / this.tamanoPagina));
+  }
+  get paginasMovimientos(): number[] {
+    return Array.from({ length: this.numeroPaginasMovimientos }, (_, i) => i + 1);
+  }
+  get movimientosPaginados(): any[] {
+    const paginaActual = Math.min(this.paginaMovimientos, this.numeroPaginasMovimientos);
+    return this.movimientos().slice((paginaActual - 1) * this.tamanoPagina, paginaActual * this.tamanoPagina);
+  }
+  irPaginaMovimientos(numero: number) {
+    this.paginaMovimientos = Math.min(this.numeroPaginasMovimientos, Math.max(1, numero));
+  }
   ordenes = signal<any[]>([]);
   nuevo = {
-    codigo: '',
     nombre: '',
     unidadMedida: 'UNIDAD',
     stockInicial: 0,
@@ -33,7 +46,10 @@ export class MaterialesAlmacen extends PaginaBase implements OnInit {
     this.api
       .get<any[]>('/almacen/movimientos')
       .subscribe({
-        next: (x) => this.movimientos.set(x),
+        next: (x) => {
+          this.movimientos.set(x);
+          this.paginaMovimientos = Math.min(this.paginaMovimientos, this.numeroPaginasMovimientos);
+        },
         error: (e) => this.error.set(this.api.mensaje(e)),
       });
     this.api.get<any[]>('/ordenes-trabajo').subscribe({ next: (x) => this.ordenes.set(x) });
@@ -56,13 +72,12 @@ export class MaterialesAlmacen extends PaginaBase implements OnInit {
   guardarMaterial() {
     this.error.set('');
     if (
-      !this.nuevo.codigo.trim() ||
       !this.nuevo.nombre.trim() ||
       !this.nuevo.unidadMedida.trim() ||
       this.nuevo.stockInicial < 0 ||
       this.nuevo.stockMinimo < 0
     ) {
-      this.error.set('Completa código, nombre, unidad y stocks válidos.');
+      this.error.set('Completa nombre, unidad y stocks válidos.');
       return;
     }
     this.protegidoCargando(

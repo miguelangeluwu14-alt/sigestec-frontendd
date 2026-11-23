@@ -34,7 +34,7 @@
       <table class="data-table">
         <thead>
           <tr>
-            <th>ORDEN DE COMPRA</th>
+            <th>CÓDIGO INTERNO / DOCUMENTO</th>
             <th>CLIENTE</th>
             <th>COTIZACIÓN</th>
             <th>FECHA EMISIÓN</th>
@@ -45,9 +45,9 @@
         <tbody>
           @for (o of paginados; track o.id) {
             <tr>
-              <td class="table-code">{{ o.numero }}</td>
+              <td class="table-code"><strong>{{ o.codigo }}</strong><div class="form-hint">Documento: {{ o.numero }}</div></td>
               <td>{{ o.cotizacion?.solicitud?.cliente?.razonSocial }}</td>
-              <td>COT-{{ o.cotizacion?.id }}</td>
+              <td>{{ o.cotizacion?.numero }}</td>
               <td>{{ o.fechaEmision }}</td>
               <td>S/ {{ o.montoTotal }}</td>
               <td>
@@ -85,7 +85,7 @@
 } @else if (esDetalle) {
   <div class="form-page">
     <div class="detail-head">
-      <h1>Orden de compra {{ registro?.numero }}</h1>
+      <h1>Orden de compra {{ registro?.codigo }}</h1>
       <a class="action-secondary" routerLink="/compras">Volver</a>
     </div>
     @if (registro) {
@@ -96,12 +96,16 @@
           <strong>{{ registro.cotizacion?.solicitud?.cliente?.razonSocial }}</strong>
         </div>
         <div>
-          <label>Número</label>
+          <label>Código interno SIGESTEC</label>
+          <strong>{{ registro.codigo }}</strong>
+        </div>
+        <div>
+          <label>Número del documento del cliente</label>
           <strong>{{ registro.numero }}</strong>
         </div>
         <div>
           <label>Cotización</label>
-          <strong>#{{ registro.cotizacion?.id }}</strong>
+          <strong>{{ registro.cotizacion?.numero }}</strong>
         </div>
         <div>
           <label>Fecha de emisión</label>
@@ -141,18 +145,18 @@
         <div class="full">
           <label>COTIZACIÓN ACEPTADA *</label>
           <select [(ngModel)]="form.cotizacionId" (ngModelChange)="seleccionarCotizacion()" [disabled]="esEdicion">
-            @if (esEdicion && form.cotizacionId) { <option [ngValue]="form.cotizacionId">Cotización #{{ form.cotizacionId }}</option> }
+            @if (esEdicion && form.cotizacionId) { <option [ngValue]="form.cotizacionId">{{ registroActual?.cotizacion?.numero || form.cotizacionId }}</option> }
             <option [ngValue]="null">Seleccione cotización aceptada</option>
             @for (c of aceptadas; track c.id) {
               <option [ngValue]="c.id">
-                COT-{{ c.id }} · {{ c.solicitud?.cliente?.razonSocial }}
+                {{ c.numero }} · {{ c.solicitud?.cliente?.razonSocial }}
               </option>
             }
           </select>
         </div>
         <div>
-          <label>NÚMERO DE ORDEN *</label>
-          <input [(ngModel)]="form.numero" placeholder="OC-2026-001" />
+          <label>NÚMERO DEL DOCUMENTO DE COMPRA DEL CLIENTE *</label>
+          <input [(ngModel)]="form.numero" placeholder="Número que figura en el documento del cliente" />
         </div>
         <div>
           <label>FECHA DE EMISIÓN *</label>
@@ -167,26 +171,12 @@
           <input type="file" accept=".pdf,application/pdf" (change)="archivo($event)" />
         @if (esEdicion && registro?.urlArchivo) { <app-documento-adjunto [url]="registro.urlArchivo" /> }
         <app-documento-adjunto [archivo]="pdf" [permitirQuitar]="true" (quitar)="pdf = null" />
-          @if (extrayendoPdf) { <p class="form-hint" role="status">Analizando PDF...</p> }
-          @if (avisoExtraccion) { <p class="form-hint" role="status">{{ avisoExtraccion }}</p> }
-          @if (propuestasPdf.length) {
-            <div class="preview-extraccion">
-              <strong>Detalles sugeridos ({{ propuestasPdf.length }})</strong>
-              @for (d of propuestasPdf; track $index) {
-                <p>{{ d.descripcion }} · {{ d.cantidad }} × S/ {{ d.precioUnitario }}</p>
-              }
-              <button type="button" class="action-secondary" (click)="aplicarPdf()">Aplicar detalles</button>
-            </div>
-          }
-          @if (vistaPreviaPdf && !propuestasPdf.length) {
-            <details class="preview-extraccion"><summary>Texto extraído</summary><pre>{{ vistaPreviaPdf }}</pre></details>
-          }
           <p class="help">Archivo PDF de hasta 8 MB.</p>
         </div>
       </div>
       @if (actual) {
         <p class="detail-note">
-          Cotización #{{ actual.id }} · Solicitud #{{ actual.solicitud?.id }}
+          Cotización {{ actual.numero }} · Solicitud {{ actual.solicitud?.codigo }}
         </p>
         <div class="section-header">
           <h2>Detalle de la orden de compra</h2>

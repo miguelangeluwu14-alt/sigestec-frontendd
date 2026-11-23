@@ -42,8 +42,8 @@
         <tbody>
           @for (a of paginados; track a.id) {
             <tr>
-              <td class="table-code">ATS-{{ a.id }}</td>
-              <td>OT-{{ a.ordenTrabajo?.id }}</td>
+              <td class="table-code">{{ a.numero }}</td>
+              <td>{{ a.ordenTrabajo?.numero }}</td>
               <td>{{ a.ordenTrabajo?.solicitud?.cliente?.razonSocial }}</td>
               <td>{{ a.fechaElaboracion }}</td>
               <td>
@@ -82,7 +82,7 @@
 } @else if (esDetalle) {
   <div class="form-page">
     <div class="detail-head">
-      <h1>ATS-{{ registro?.id }}</h1>
+      <h1>{{ registro?.numero }}</h1>
       <a class="action-secondary" routerLink="/ats">Volver</a>
     </div>
     @if (registro) {
@@ -90,7 +90,7 @@
       <div class="detail-grid">
         <div>
           <label>Orden de trabajo</label>
-          <strong>OT-{{ registro.ordenTrabajo?.id }}</strong>
+          <strong>{{ registro.ordenTrabajo?.numero }}</strong>
         </div>
         <div>
           <label>Cliente</label>
@@ -185,11 +185,11 @@
         <div class="full">
           <label>ORDEN DE TRABAJO PROGRAMADA *</label>
           <select [(ngModel)]="form.ordenTrabajoId" [disabled]="esEdicion">
-            @if (esEdicion) { <option [ngValue]="form.ordenTrabajoId">OT-{{ form.ordenTrabajoId }}</option> }
+            @if (esEdicion) { <option [ngValue]="form.ordenTrabajoId">{{ actual?.numero || form.ordenTrabajoId }}</option> }
             <option [ngValue]="null">Seleccione una OT</option>
             @for (o of elegibles; track o.id) {
               <option [ngValue]="o.id">
-                OT-{{ o.id }} · {{ o.solicitud?.cliente?.razonSocial }}
+                {{ o.numero }} · {{ o.solicitud?.cliente?.razonSocial }}
               </option>
             }
           </select>

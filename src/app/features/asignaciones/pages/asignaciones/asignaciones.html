@@ -42,7 +42,7 @@
         <tbody>
           @for (o of paginados; track o.id) {
             <tr>
-              <td class="table-code">OT-{{ o.id }}</td>
+              <td class="table-code">{{ o.numero }}</td>
               <td>{{ o.solicitud?.cliente?.razonSocial }}</td>
               <td>{{ o.tecnico?.nombre }}</td>
               <td>{{ o.ssoma?.nombre }}</td>
@@ -93,14 +93,14 @@
 } @else if (esDetalle) {
   <div class="form-page">
     <div class="detail-head">
-      <h1>Asignación OT-{{ registro?.id }}</h1>
+      <h1>Asignación {{ registro?.numero }}</h1>
       <a class="action-secondary" routerLink="/asignaciones">Volver</a>
     </div>
     @if (registro) {
       <div class="detail-grid">
         <div>
           <label>Solicitud</label>
-          <strong>#{{ registro.solicitud?.id }}</strong>
+          <strong>{{ registro.solicitud?.codigo }}</strong>
         </div>
         <div>
           <label>Cliente</label>
@@ -151,10 +151,10 @@
           <select [(ngModel)]="form.solicitudId" [disabled]="esEdicion">
             <option [ngValue]="null">Seleccione una solicitud</option>
             @for (s of pendientes; track s.id) {
-              <option [ngValue]="s.id">Solicitud #{{ s.id }} · {{ s.cliente?.razonSocial }}</option>
+              <option [ngValue]="s.id">{{ s.codigo }} · {{ s.cliente?.razonSocial }}</option>
             }
             @if (esEdicion) {
-              <option [ngValue]="form.solicitudId">Solicitud #{{ form.solicitudId }}</option>
+              <option [ngValue]="form.solicitudId">{{ registroActual?.solicitud?.codigo || form.solicitudId }}</option>
             }
           </select>
         </div>

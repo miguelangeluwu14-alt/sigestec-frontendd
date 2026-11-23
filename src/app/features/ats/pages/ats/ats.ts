@@ -81,7 +81,7 @@ export class AtsPage extends PaginaBase implements OnInit {
     return Array.isArray(datos) ? datos : [];
   }
   override textoBusqueda(x: any) {
-    return `${x.id} ${x.ordenTrabajo?.id} ${x.ordenTrabajo?.solicitud?.cliente?.razonSocial} ${x.peligros || ''}`;
+    return `${x.numero || ''} ${x.id} ${x.ordenTrabajo?.numero || ''} ${x.ordenTrabajo?.solicitud?.cliente?.razonSocial} ${x.peligros || ''}`;
   }
   get elegibles() {
     return this.ordenes().filter(

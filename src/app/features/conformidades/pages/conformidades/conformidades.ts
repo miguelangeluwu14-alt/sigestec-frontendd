@@ -3,6 +3,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { PaginaBase } from '../../../../shared/pages/pagina-base';
+import { fechaISO } from '../../../../core/utils/fechas-servicio';
 
 @Component({
   standalone: true,
@@ -14,7 +15,6 @@ export class Conformidades extends PaginaBase implements OnInit {
   informes = signal<any[]>([]);
   form = {
     ordenTrabajoId: null as number | null,
-    numeroActa: '',
     fechaConformidad: '',
     nombreRepresentante: '',
     representanteEmpresaId: null as number | null,
@@ -33,7 +33,7 @@ export class Conformidades extends PaginaBase implements OnInit {
       });
   }
   override textoBusqueda(x: any) {
-    return `${x.numeroActa} ${x.ordenTrabajo?.id} ${x.ordenTrabajo?.solicitud?.cliente?.razonSocial} ${x.estadoConformidad}`;
+    return `${x.numeroActa} ${x.ordenTrabajo?.numero || ''} ${x.ordenTrabajo?.solicitud?.cliente?.razonSocial} ${x.estadoConformidad}`;
   }
   get elegibles() {
     return this.informes().filter(
@@ -44,6 +44,14 @@ export class Conformidades extends PaginaBase implements OnInit {
   }
   get actual() {
     return this.informes().find((i) => i.ordenTrabajo?.id === this.form.ordenTrabajoId);
+  }
+  get fechaMinimaConformidad(): string {
+    return fechaISO(this.actual?.fechaEnvio);
+  }
+  seleccionarOt(id: number | null) {
+    this.form.ordenTrabajoId = id;
+    this.form.fechaConformidad = '';
+    this.error.set('');
   }
   archivo(e: Event) {
     this.acta = (e.target as HTMLInputElement).files?.item(0) || null;
@@ -59,14 +67,25 @@ export class Conformidades extends PaginaBase implements OnInit {
     this.error.set('');
     if (
       !this.form.ordenTrabajoId ||
-      !this.form.numeroActa.trim() ||
       !this.form.nombreRepresentante.trim() ||
       !this.form.fechaConformidad ||
       !this.acta
     ) {
       this.error.set(
-        'Completa OT, número de acta, representante, fecha y adjunta el acta firmada.',
+        'Completa OT, representante y fecha; además, adjunta el acta firmada.',
       );
+      return;
+    }
+    if (!this.actual || this.actual.estado !== 'ENVIADO') {
+      this.error.set('Selecciona una OT con informe técnico enviado.');
+      return;
+    }
+    if (!this.fechaMinimaConformidad) {
+      this.error.set('No se encontró la fecha de envío del informe técnico.');
+      return;
+    }
+    if (this.form.fechaConformidad < this.fechaMinimaConformidad) {
+      this.error.set(`La fecha de conformidad no puede ser anterior al envío del informe (${this.fechaMinimaConformidad}).`);
       return;
     }
     const fd = new FormData();

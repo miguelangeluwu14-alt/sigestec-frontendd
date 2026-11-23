@@ -15,7 +15,6 @@ export class Solicitudes extends PaginaBase implements OnInit {
   private cdr=inject(ChangeDetectorRef);
   clientes = signal<any[]>([]);
   tipos = signal<any[]>([]);
-  filtroCliente = '';
   pdf: File | null = null;
   quitarPdf = false;
   form = {
@@ -54,13 +53,10 @@ export class Solicitudes extends PaginaBase implements OnInit {
       });
   }
   override textoBusqueda(x: any) {
-    return `${x.id} ${x.cliente?.razonSocial || ''} ${x.tipoServicio?.nombre || ''} ${x.descripcion || ''}`;
+    return `${x.codigo || ''} ${x.id} ${x.cliente?.razonSocial || ''} ${x.tipoServicio?.nombre || ''} ${x.descripcion || ''}`;
   }
-  get clientesFiltrados() {
-    const b = this.filtroCliente.toLocaleLowerCase('es');
-    return this.clientes().filter((c) => c.estado !== 'I').filter((c) =>
-      `${c.razonSocial} ${c.ruc}`.toLocaleLowerCase('es').includes(b),
-    );
+  get clientesActivos() {
+    return this.clientes().filter((c) => c.estado !== 'I');
   }
   get tiposActivos() {
     return this.tipos().filter((t) => t.estado !== 'I');
@@ -70,7 +66,7 @@ export class Solicitudes extends PaginaBase implements OnInit {
     return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
   }
   codigo(i: any) {
-    return `SOL-${String(i.fechaRecepcion || '').slice(0, 4) || new Date().getFullYear()}-${String(i.id).padStart(3, '0')}`;
+    return i.codigo || 'Código pendiente';
   }
   archivo(e: Event) {
     this.pdf = (e.target as HTMLInputElement).files?.item(0) || null;

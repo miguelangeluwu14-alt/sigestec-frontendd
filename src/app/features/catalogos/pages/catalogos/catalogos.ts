@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { ApiService } from '../../../../core/services/api.service';
+import { REGISTROS_POR_PAGINA } from '../../../../shared/pages/pagina-base';
 type EmpresaConsultada = { ruc: string; razonSocial: string; estado: string; condicion: string; direccion: string };
 import { AccionesSeguras } from '../../../../shared/components/acciones-seguras/acciones-seguras';
 
@@ -22,6 +23,22 @@ export class Catalogos implements OnInit {
     return this.esClientes ? '/clientes' : '/tipos-servicio';
   }
   items: any[] = [];
+  pagina = 1;
+  readonly tamanoPagina = REGISTROS_POR_PAGINA;
+
+  get numeroPaginas(): number {
+    return Math.max(1, Math.ceil(this.items.length / this.tamanoPagina));
+  }
+  get paginas(): number[] {
+    return Array.from({ length: this.numeroPaginas }, (_, i) => i + 1);
+  }
+  get paginados(): any[] {
+    const paginaActual = Math.min(this.pagina, this.numeroPaginas);
+    return this.items.slice((paginaActual - 1) * this.tamanoPagina, paginaActual * this.tamanoPagina);
+  }
+  irPagina(numero: number) {
+    this.pagina = Math.min(this.numeroPaginas, Math.max(1, numero));
+  }
   buscarEmpresa = '';
   consultando = false;
   empresasConsultadas: EmpresaConsultada[] = [];
@@ -66,7 +83,7 @@ export class Catalogos implements OnInit {
     this.api
       .get<any[]>(this.ruta)
       .subscribe({
-        next: (x) => { this.items = x; this.cdr.markForCheck(); },
+        next: (x) => { this.items = x; this.pagina = Math.min(this.pagina, this.numeroPaginas); this.cdr.markForCheck(); },
         error: (e) => { this.error = this.api.mensaje(e); this.cdr.markForCheck(); },
       });
   }

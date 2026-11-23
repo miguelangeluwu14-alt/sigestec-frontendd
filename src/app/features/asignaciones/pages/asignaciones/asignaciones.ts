@@ -61,7 +61,10 @@ export class Asignaciones extends PaginaBase implements OnInit {
       });
   }
   override textoBusqueda(x: any) {
-    return `${x.id} ${x.solicitud?.cliente?.razonSocial} ${x.tecnico?.nombre} ${x.ssoma?.nombre}`;
+    return `${x.numero || ''} ${x.solicitud?.codigo || ''} ${x.solicitud?.cliente?.razonSocial} ${x.tecnico?.nombre} ${x.ssoma?.nombre}`;
+  }
+  get registroActual() {
+    return this.items().find((o) => o.id === this.id);
   }
   get pendientes() {
     return this.solicitudes().filter(

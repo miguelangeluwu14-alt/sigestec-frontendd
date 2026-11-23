@@ -96,17 +96,12 @@
     <h1>{{ esEdicion ? 'Editar solicitud de servicio' : 'Nueva solicitud de servicio' }}</h1>
     @if (esEdicion) { <p class="detail-note">El cliente y el tipo de servicio quedan bloqueados. Solo pueden corregirse descripción, observaciones y documento antes de cotizar.</p> }
     <section class="form-section">
-      <h2>Buscar cliente</h2>
-      <input
-        aria-label="Buscar cliente"
-        [(ngModel)]="filtroCliente"
-        placeholder="Busque por razón social o RUC"
-      />
+      <h2>Seleccionar cliente</h2>
       <label for="cliente-sol">Seleccione un cliente *</label>
       <select id="cliente-sol" [(ngModel)]="form.clienteId" [disabled]="esEdicion">
         <option [ngValue]="null">Seleccione un cliente</option>
         @if (esEdicion && form.clienteId) { <option [ngValue]="form.clienteId">{{ registro?.cliente?.razonSocial || 'Cliente registrado' }}</option> }
-        @for (c of clientesFiltrados; track c.id) {
+        @for (c of clientesActivos; track c.id) {
           <option [ngValue]="c.id">{{ c.razonSocial }} · {{ c.ruc }}</option>
         }
       </select>

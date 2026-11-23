@@ -20,6 +20,30 @@ export class Programaciones extends PaginaBase implements OnInit {
     aprobadoCliente: false,
     motivoCambio: '',
   };
+  // El control datetime-local utiliza hora local (sin conversión a UTC).
+  // Redondeamos al siguiente minuto: así nunca se ofrece una hora ya transcurrida.
+  minimoInicio = this.fechaHoraLocal(Math.ceil(Date.now() / 60_000) * 60_000);
+
+  get minimoFin(): string {
+    const inicio = new Date(this.form.inicio).getTime();
+    const minimoActual = new Date(this.minimoInicio).getTime();
+    const minimoPermitido = Number.isFinite(inicio)
+      ? Math.max(inicio + 60_000, minimoActual)
+      : minimoActual;
+    return this.fechaHoraLocal(minimoPermitido);
+  }
+
+  actualizarLimitesFechas(): void {
+    // Se actualiza al abrir cada selector, aunque el formulario lleve tiempo abierto.
+    this.minimoInicio = this.fechaHoraLocal(Math.ceil(Date.now() / 60_000) * 60_000);
+  }
+
+  private fechaHoraLocal(instante: number): string {
+    const fecha = new Date(instante);
+    const dosDigitos = (numero: number) => String(numero).padStart(2, '0');
+    return `${fecha.getFullYear()}-${dosDigitos(fecha.getMonth() + 1)}-${dosDigitos(fecha.getDate())}T${dosDigitos(fecha.getHours())}:${dosDigitos(fecha.getMinutes())}`;
+  }
+
   archivos: Record<'pt' | 'iper' | 'croquis', File | null> = {
     pt: null,
     iper: null,
@@ -38,7 +62,7 @@ export class Programaciones extends PaginaBase implements OnInit {
     });
   }
   override textoBusqueda(x: any) {
-    return `${x.id} ${x.solicitud?.cliente?.razonSocial} ${x.tecnico?.nombre} ${x.lugar || ''}`;
+    return `${x.numero || ''} ${x.solicitud?.codigo || ''} ${x.solicitud?.cliente?.razonSocial} ${x.tecnico?.nombre} ${x.lugar || ''}`;
   }
   get actual() {
     return this.items().find((o) => o.id === this.idOrden);
@@ -78,8 +102,21 @@ export class Programaciones extends PaginaBase implements OnInit {
       this.error.set('Completa la documentación, aprobación del cliente y datos de programación.');
       return;
     }
-    if (new Date(this.form.fin).getTime() <= new Date(this.form.inicio).getTime()) {
-      this.error.set('La fecha de fin debe ser posterior a la de inicio.');
+    // Volvemos a comprobar las fechas al guardar. El atributo min del HTML
+    // por sí solo no impide fechas inválidas escritas manualmente.
+    const inicio = new Date(this.form.inicio).getTime();
+    const fin = new Date(this.form.fin).getTime();
+    if (!Number.isFinite(inicio) || !Number.isFinite(fin)) {
+      this.error.set('Ingresa fechas y horas válidas para el inicio y el fin.');
+      return;
+    }
+    if (inicio <= Date.now()) {
+      this.actualizarLimitesFechas();
+      this.error.set('La fecha y hora de inicio deben ser posteriores al momento actual.');
+      return;
+    }
+    if (fin <= inicio) {
+      this.error.set('La fecha y hora de fin deben ser posteriores a las de inicio.');
       return;
     }
     if (

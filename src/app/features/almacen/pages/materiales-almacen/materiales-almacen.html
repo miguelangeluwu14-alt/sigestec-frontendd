@@ -46,7 +46,12 @@
                   <span class="status-chip estado-exito">Disponible</span>
                 }
               </td>
-                          <td><app-acciones-seguras recurso="materiales" [registro]="m" (actualizado)="actualizarListado('/almacen/materiales')" /></td>
+                          <td><div class="row-actions">
+                  <a [routerLink]="['/almacen/materiales/ver', m.id]" title="Ver material" aria-label="Ver material">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </a>
+                  <app-acciones-seguras [mostrarVer]="false" recurso="materiales" [registro]="m" (actualizado)="actualizarListado('/almacen/materiales')" />
+                </div></td>
             </tr>
           } @empty {
             <tr>
@@ -84,7 +89,7 @@
             </tr>
           </thead>
           <tbody>
-            @for (m of movimientos(); track m.id) {
+            @for (m of movimientosPaginados; track m.id) {
               <tr>
                 <td>{{ m.fechaMovimiento?.slice(0, 16) }}</td>
                 <td>
@@ -99,9 +104,11 @@
                 </td>
                 <td>{{ m.material?.nombre }}</td>
                 <td>{{ m.cantidad }}</td>
-                <td>{{ m.ordenTrabajoId ? 'OT-' + m.ordenTrabajoId : '—' }}</td>
+                <td>{{ m.ordenTrabajoNumero || '—' }}</td>
                 <td>{{ m.empleadoRegistra?.nombre }}</td>
-                <td><app-acciones-seguras recurso="movimientos-materiales" [registro]="m" /></td>
+                <td><div class="row-actions"><a [routerLink]="['/almacen/materiales/movimientos/ver', m.id]" title="Ver movimiento" aria-label="Ver movimiento">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                </a></div></td>
               </tr>
             } @empty {
               <tr>
@@ -110,6 +117,16 @@
             }
           </tbody>
         </table>
+      </div>
+      <div class="table-footer">
+        <span>Mostrando {{ movimientosPaginados.length }} de {{ movimientos().length }} movimientos</span>
+        <div class="pagination" aria-label="Páginas del historial de movimientos">
+          <button type="button" [disabled]="paginaMovimientos === 1" (click)="irPaginaMovimientos(paginaMovimientos - 1)" aria-label="Página anterior de movimientos">‹</button>
+          @for (n of paginasMovimientos; track n) {
+            <button type="button" [class.current]="n === paginaMovimientos" (click)="irPaginaMovimientos(n)" [attr.aria-label]="'Página de movimientos ' + n" [attr.aria-current]="n === paginaMovimientos ? 'page' : null">{{ n }}</button>
+          }
+          <button type="button" [disabled]="paginaMovimientos === numeroPaginasMovimientos" (click)="irPaginaMovimientos(paginaMovimientos + 1)" aria-label="Página siguiente de movimientos">›</button>
+        </div>
       </div>
     </section>
   </section>
@@ -126,8 +143,8 @@
       <h2>Catálogo y stock</h2>
       <div class="form-grid">
         <div>
-          <label>CÓDIGO *</label>
-          <input [(ngModel)]="nuevo.codigo" maxlength="30" />
+          <label>CÓDIGO</label>
+          <input value="Se asignará automáticamente al guardar" readonly class="readonly-input" aria-label="Código generado automáticamente" />
         </div>
         <div>
           <label>NOMBRE *</label>
@@ -198,7 +215,7 @@
               <option [ngValue]="null">Seleccione una OT</option>
               @for (o of ordenes(); track o.id) {
                 <option [ngValue]="o.id">
-                  OT-{{ o.id }} · {{ o.solicitud?.cliente?.razonSocial }}
+                  {{ o.numero }} · {{ o.solicitud?.cliente?.razonSocial }}
                 </option>
               }
             </select>
